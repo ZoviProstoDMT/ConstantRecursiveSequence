@@ -42,10 +42,22 @@ public class RecurrentRelation {
     public String toString() {
         StringBuilder recurrentRelation = new StringBuilder();
         for (int i = 0; i < countOfMembers; i++) {
-            if (i != countOfMembers - 1) {
-                recurrentRelation.append(coefficients.get(i)).append("C").append(i).append(coefficients.get(i + 1) >= 0 ? " + " : " - ");
-            } else {
-                recurrentRelation.append(coefficients.get(i)).append("C").append(i);
+            if (coefficients.get(i) != 0) {
+                if (i != countOfMembers - 1) {
+                    if (coefficients.get(i) != 1 && coefficients.get(i) != -1) {
+                        recurrentRelation.append(coefficients.get(i)).append("C");
+                    } else {
+                        recurrentRelation.append("C");
+                    }
+                    recurrentRelation.append(i).append(coefficients.get(i + 1) >= 0 ? " + " : " - ");
+                } else {
+                    if (coefficients.get(i) != 1 && coefficients.get(i) != -1) {
+                        recurrentRelation.append(coefficients.get(i)).append("C");
+                    } else {
+                        recurrentRelation.append("C");
+                    }
+                    recurrentRelation.append(i).append(" = C").append(i + 1);
+                }
             }
         }
         return String.valueOf(recurrentRelation);
