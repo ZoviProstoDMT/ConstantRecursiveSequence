@@ -40,7 +40,7 @@ public class LRP {
     }
 
     public List<Integer> getSequence(int numberOfMembers) {
-        calculateSequence(numberOfMembers);
+        sequence = calculateSequence(numberOfMembers);
         return sequence;
     }
 
@@ -48,20 +48,23 @@ public class LRP {
         this.sequence = sequence;
     }
 
-    private void calculateSequence(int numberOfMembers) {
+    private List<Integer> calculateSequence(int numberOfMembers) {
         List<Integer> resultSequence = new ArrayList<>(u0);
         tempU0 = new ArrayList<>(u0);
         for (int i = 0; i < numberOfMembers - u0.size(); i++) {
             int nextMemberOfSequence = getNextMemberOfSequence(recurrentRelation, tempU0);
-            makeALeftShiftForSequence(tempU0, nextMemberOfSequence);
+            tempU0 = makeALeftShiftForSequence(tempU0, nextMemberOfSequence);
             resultSequence.add(nextMemberOfSequence);
         }
-        setSequence(resultSequence);
+        return resultSequence;
     }
 
     private int getNextMemberOfSequence(RecurrentRelation recurrentRelation, List<Integer> u0) {
         int result = 0;
         int modF = recurrentRelation.getModF();
+        if (u0.size() > recurrentRelation.getCoefficients().size()) {
+            u0 = u0.subList(u0.size() - recurrentRelation.getCoefficients().size(), u0.size() - 1);
+        }
         for (int i = 0; i < u0.size(); i++) {
             int member = recurrentRelation.getCoefficients().get(i) * u0.get(i);
             result += member % modF;
@@ -70,9 +73,24 @@ public class LRP {
         return result;
     }
 
-    private void makeALeftShiftForSequence(List<Integer> tempU0, int nextMember) {
+    private List<Integer> makeALeftShiftForSequence(List<Integer> tempU0, int nextMember) {
         tempU0.add(nextMember);
-        List<Integer> newTempU0 = tempU0.subList(1, tempU0.size());
-        setTempU0(newTempU0);
+        return tempU0.subList(1, tempU0.size());
+    }
+
+    public LRP multiply(int degreeOfMonomial) {
+        List<Integer> calculatedSequence = calculateSequence(degreeOfMonomial + 21);
+        calculatedSequence = calculatedSequence.subList(degreeOfMonomial, calculatedSequence.size() - 1);
+        return new LRP(recurrentRelation, calculatedSequence.subList(0, recurrentRelation.getDegree() - 1));
+//        if (u0.size() > degreeOfMonomial + recurrentRelation.getCountOfMembers()) {
+//            return u0.subList(degreeOfMonomial, u0.size() - 1);
+//        } else {
+//            List<Integer> calculatedSequence = calculateSequence(degreeOfMonomial + 20);
+//            return calculatedSequence.subList(degreeOfMonomial, calculatedSequence.size() - 1);
+//        }
+    }
+
+    private void calculateGenerator() {
+
     }
 }

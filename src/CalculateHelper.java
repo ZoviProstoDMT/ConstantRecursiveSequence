@@ -14,7 +14,9 @@ public class CalculateHelper {
         Polynomial polynomial = new Polynomial(recurrentRelation);
         System.out.println("Характеристический многочлен: " + polynomial);
         System.out.println("Коэффициенты характеристического многочлена: " + polynomial.getCoefficients());
-        List<Integer> lrpSequence = lrp.getSequence(20);
+        List<Integer> lrpSequence = lrp.getSequence(30);
         System.out.println("Последовательность размера " + lrpSequence.size() + ": " + lrpSequence);
+        LRP lrp1 = lrp.multiply(6);
+        System.out.println("Последовательность, умноженная на X^6: " + lrp1.getSequence(20));
     }
 }

@@ -4,13 +4,13 @@ import java.util.List;
 
 public class RecurrentRelation {
 
-    private int modF;
-    private int countOfMembers;
-    private List<Integer> coefficients;
+    private final int modF;
+    private final int degree;
+    private final List<Integer> coefficients;
 
-    public RecurrentRelation(int modF, int countOfMembers, List<Integer> coefficients) {
+    public RecurrentRelation(int modF, int degree, List<Integer> coefficients) {
         this.modF = modF;
-        this.countOfMembers = countOfMembers;
+        this.degree = degree;
         this.coefficients = coefficients;
     }
 
@@ -18,32 +18,20 @@ public class RecurrentRelation {
         return modF;
     }
 
-    public void setModF(int modF) {
-        this.modF = modF;
-    }
-
-    public int getCountOfMembers() {
-        return countOfMembers;
-    }
-
-    public void setCountOfMembers(int countOfMembers) {
-        this.countOfMembers = countOfMembers;
+    public int getDegree() {
+        return degree;
     }
 
     public List<Integer> getCoefficients() {
         return coefficients;
     }
 
-    public void setCoefficients(List<Integer> coefficients) {
-        this.coefficients = coefficients;
-    }
-
     @Override
     public String toString() {
         StringBuilder recurrentRelation = new StringBuilder();
-        for (int i = 0; i < countOfMembers; i++) {
+        for (int i = 0; i < degree; i++) {
             if (coefficients.get(i) != 0) {
-                if (i != countOfMembers - 1) {
+                if (i != degree - 1) {
                     if (coefficients.get(i) != 1 && coefficients.get(i) != -1) {
                         recurrentRelation.append(coefficients.get(i)).append("C");
                     } else {
