@@ -5,27 +5,16 @@ import java.util.List;
 
 public class Polynomial {
 
-    private int modF;
     private RecurrentRelation recurrentRelation;
     private List<Integer> coefficients;
 
     public Polynomial(RecurrentRelation recurrentRelation) {
         this.recurrentRelation = recurrentRelation;
-        modF = recurrentRelation.getModF();
         reverseCoefficients(recurrentRelation.getCoefficients());
     }
 
-    public Polynomial(int modF, List<Integer> coefficients) {
-        this.modF = modF;
+    public Polynomial(List<Integer> coefficients) {
         this.coefficients = coefficients;
-    }
-
-    public int getModF() {
-        return modF;
-    }
-
-    public void setModF(int modF) {
-        this.modF = modF;
     }
 
     public List<Integer> getCoefficients() {
@@ -63,7 +52,7 @@ public class Polynomial {
                 if (coefficients.get(i) > 0) {
                     result.append(" + ");
                     if (i == 0) {
-                        result.append(1);
+                        result.append(coefficients.get(i));
                     } else {
                         if (coefficients.get(i) == 1 || coefficients.get(i) == -1) {
                             result.append("X^").append(i);
@@ -74,7 +63,7 @@ public class Polynomial {
                 } else {
                     result.append(" - ");
                     if (i == 0) {
-                        result.append(1);
+                        result.append(coefficients.get(i));
                     } else {
                         if (coefficients.get(i) == 1 || coefficients.get(i) == -1) {
                             result.append("X^").append(i);
