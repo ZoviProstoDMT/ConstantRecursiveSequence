@@ -7,6 +7,7 @@ import java.util.List;
 public class Polynomial {
 
     private List<Integer> coefficients;
+    private Polynomial remainder;
 
     public Polynomial(RecurrentRelation recurrentRelation) {
         reverseCoefficients(recurrentRelation.getCoefficients());
@@ -16,8 +17,21 @@ public class Polynomial {
         this.coefficients = coefficients;
     }
 
+    public Polynomial(List<Integer> coefficients, Polynomial remainder) {
+        this.coefficients = coefficients;
+        this.remainder = remainder;
+    }
+
     public List<Integer> getCoefficients() {
         return coefficients;
+    }
+
+    public Polynomial getRemainder() {
+        return remainder;
+    }
+
+    public void setRemainder(Polynomial remainder) {
+        this.remainder = remainder;
     }
 
     private void reverseCoefficients(List<Integer> coefficients) {
@@ -26,21 +40,20 @@ public class Polynomial {
         this.coefficients.add(1);
     }
 
-    private Polynomial divide(Polynomial polynomial) {
-        return this;
-    }
-
-    public Polynomial divide(int coefficient, int degree) {
-        if (coefficient == 0) {
-            throw new ArithmeticException();
-        } else if (coefficient == 1 && degree == 1) {
-            return this;
-        } else {
-            List<Integer> coefficients = new ArrayList<>(this.coefficients);
-            List<Integer> newCoefficients = getEmptyList(coefficients.size() - degree);
-            newCoefficients.set(newCoefficients.size() - 1, coefficients.get(coefficients.size() - 1) / coefficient);
-            return new Polynomial(newCoefficients);
+    public Polynomial divide(Polynomial polynomial) {
+        if (this.coefficients.size() == polynomial.coefficients.size()) {
+            return new Polynomial(Collections.singletonList(1), this.subtract(polynomial));
+        } else if (!this.isBiggerThan(polynomial)) {
+            return new Polynomial(Collections.singletonList(0));
         }
+        int shift = this.simplifyCoefficients().getCoefficients().size() - polynomial.simplifyCoefficients().getCoefficients().size();
+        Polynomial result = new Polynomial(coefficients.subList(shift, coefficients.size()));
+        Polynomial remainder = this.subtract(result.multiply(polynomial));
+        result.setRemainder(remainder);
+        if (remainder.getCoefficients().size() >= polynomial.getCoefficients().size()) {
+            result = result.sum(remainder.divide(polynomial));
+        }
+        return result;
     }
 
     public Polynomial getNod(Polynomial polynomial) {
@@ -53,7 +66,7 @@ public class Polynomial {
             Polynomial tempMultiply = this.multiply(polynomial.getCoefficients().get(i), i);
             result = result.sum(tempMultiply);
         }
-        return result;
+        return result.simplifyCoefficients();
     }
 
     private Polynomial multiply(int coefficient, int degree) {
@@ -67,12 +80,12 @@ public class Polynomial {
             for (int i = 0; i < coefficients.size(); i++) {
                 newCoefficients.set(i + degree, coefficients.get(i) * coefficient);
             }
-            return new Polynomial(newCoefficients);
+            return new Polynomial(newCoefficients).simplifyCoefficients();
         }
     }
 
     public Polynomial subtract(Polynomial polynomial) {
-        return this.sum(polynomial.revert());
+        return this.sum(polynomial.revert()).simplifyCoefficients();
     }
 
     public Polynomial sum(Polynomial polynomial) {
@@ -85,7 +98,7 @@ public class Polynomial {
         for (int i = 0; i < Math.min(coefficients.size(), polynomial.getCoefficients().size()); i++) {
             coefficients.set(i, coefficients.get(i) + polynomial.getCoefficients().get(i));
         }
-        return new Polynomial(coefficients);
+        return new Polynomial(coefficients).simplifyCoefficients();
     }
 
     public Polynomial revert() {
@@ -96,8 +109,17 @@ public class Polynomial {
         return new Polynomial(coefficients);
     }
 
-    private boolean isBiggerThan(Polynomial polynomial) {
-        return this.getCoefficients().size() > polynomial.getCoefficients().size();
+    public boolean isBiggerThan(Polynomial polynomial) {
+        List<Integer> coefficientsA = this.getCoefficients();
+        List<Integer> coefficientsB = polynomial.coefficients;
+        if (coefficientsA.size() == coefficientsB.size()) {
+            for (int i = coefficientsA.size() - 1; i >= 0; i--) {
+                if (!coefficientsA.get(i).equals(coefficientsB.get(i))) {
+                    return coefficientsA.get(i) > coefficientsB.get(i);
+                }
+            }
+        }
+        return coefficientsA.size() > coefficientsB.size();
     }
 
     private List<Integer> getEmptyList(int size) {
@@ -108,19 +130,30 @@ public class Polynomial {
         return list;
     }
 
+    private Polynomial simplifyCoefficients() {
+        for (int i = this.getCoefficients().size() - 1; i > 0; i--) {
+            if (this.getCoefficients().get(i) == 0) {
+                this.getCoefficients().remove(i);
+            } else {
+                return this;
+            }
+        }
+        return this;
+    }
+
     @Override
     public String toString() {
         StringBuilder result = new StringBuilder();
-        if (coefficients.get(coefficients.size() - 1) != 0) {
+        if (coefficients.size() == 1) {
+            return String.valueOf(coefficients.get(0));
+        } else if (coefficients.get(coefficients.size() - 1) != 0) {
             if (coefficients.get(coefficients.size() - 1) != 1 && coefficients.get(coefficients.size() - 1) != -1) {
                 result.append(coefficients.get(coefficients.size() - 1));
             } else {
                 result.append(coefficients.get(coefficients.size() - 1) == -1 ? "-" : "");
             }
-            if ((coefficients.size() - 1) != 0) {
-                result.append("X");
-            }
-            result.append(coefficients.size() - 1 == 1 ? "" : (coefficients.size() - 1) != 0 ? "^" + (coefficients.size() - 1) : "");
+            result.append("X");
+            result.append(coefficients.size() - 1 == 1 ? "" : "^" + (coefficients.size() - 1));
         }
         for (int i = coefficients.size() - 2; i >= 0; i--) {
             if (coefficients.get(i) != 0) {
