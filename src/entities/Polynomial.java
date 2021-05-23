@@ -34,6 +34,14 @@ public class Polynomial {
         this.remainder = remainder;
     }
 
+    public int getDegree() {
+        return coefficients.size();
+    }
+
+    public int getHighestCoefficient() {
+        return coefficients.get(coefficients.size() - 1);
+    }
+
     private void reverseCoefficients(List<Integer> coefficients) {
         this.coefficients = new ArrayList<>();
         coefficients.forEach(coefficient -> this.coefficients.add(coefficient * -1));
@@ -41,32 +49,29 @@ public class Polynomial {
     }
 
     public Polynomial divide(Polynomial polynomial) {
-        if (this.coefficients.size() == polynomial.coefficients.size()) {
-            return new Polynomial(Collections.singletonList(1), this.subtract(polynomial));
-        } else if (!this.isBiggerThan(polynomial)) {
-            return new Polynomial(Collections.singletonList(0));
-        }
-        int shift = this.simplifyCoefficients().getCoefficients().size() - polynomial.simplifyCoefficients().getCoefficients().size();
-        Polynomial result = new Polynomial(coefficients.subList(shift, coefficients.size()));
+        int tempDegree = this.trimCoefficients().getDegree() - polynomial.trimCoefficients().getDegree();
+        int tempCoefficient = this.getHighestCoefficient() / polynomial.getHighestCoefficient();
+        Polynomial result = getMonomial(tempDegree, tempCoefficient);
         Polynomial remainder = this.subtract(result.multiply(polynomial));
         result.setRemainder(remainder);
-        if (remainder.getCoefficients().size() >= polynomial.getCoefficients().size()) {
-            result = result.sum(remainder.divide(polynomial));
+        if (result.getRemainder().getDegree() >= polynomial.getDegree()) {
+            result = result.sum(result.getRemainder().divide(polynomial));
+            result.setRemainder(this.subtract(result.multiply(polynomial)));
         }
         return result;
     }
 
-    public Polynomial getNod(Polynomial polynomial) {
+    public Polynomial getGSD(Polynomial polynomial) {
         return this;
     }
 
     public Polynomial multiply(Polynomial polynomial) {
         Polynomial result = new Polynomial(Collections.singletonList(0));
-        for (int i = 0; i < polynomial.getCoefficients().size(); i++) {
+        for (int i = 0; i < polynomial.getDegree(); i++) {
             Polynomial tempMultiply = this.multiply(polynomial.getCoefficients().get(i), i);
             result = result.sum(tempMultiply);
         }
-        return result.simplifyCoefficients();
+        return result.trimCoefficients();
     }
 
     private Polynomial multiply(int coefficient, int degree) {
@@ -80,25 +85,25 @@ public class Polynomial {
             for (int i = 0; i < coefficients.size(); i++) {
                 newCoefficients.set(i + degree, coefficients.get(i) * coefficient);
             }
-            return new Polynomial(newCoefficients).simplifyCoefficients();
+            return new Polynomial(newCoefficients).trimCoefficients();
         }
     }
 
     public Polynomial subtract(Polynomial polynomial) {
-        return this.sum(polynomial.revert()).simplifyCoefficients();
+        return this.sum(polynomial.revert()).trimCoefficients();
     }
 
     public Polynomial sum(Polynomial polynomial) {
         List<Integer> coefficients = new ArrayList<>(this.coefficients);
-        if (polynomial.getCoefficients().size() > coefficients.size()) {
-            for (int i = 0; i <= polynomial.getCoefficients().size() - coefficients.size(); i++) {
+        if (polynomial.getDegree() > coefficients.size()) {
+            for (int i = 0; i <= polynomial.getDegree() - coefficients.size(); i++) {
                 coefficients.add(0);
             }
         }
-        for (int i = 0; i < Math.min(coefficients.size(), polynomial.getCoefficients().size()); i++) {
+        for (int i = 0; i < Math.min(coefficients.size(), polynomial.getDegree()); i++) {
             coefficients.set(i, coefficients.get(i) + polynomial.getCoefficients().get(i));
         }
-        return new Polynomial(coefficients).simplifyCoefficients();
+        return new Polynomial(coefficients).trimCoefficients();
     }
 
     public Polynomial revert() {
@@ -130,8 +135,17 @@ public class Polynomial {
         return list;
     }
 
-    private Polynomial simplifyCoefficients() {
-        for (int i = this.getCoefficients().size() - 1; i > 0; i--) {
+    private Polynomial getMonomial(int degree, int coefficient) {
+        List<Integer> list = new ArrayList<>();
+        for (int i = 0; i < degree; i++) {
+            list.add(0);
+        }
+        list.add(coefficient);
+        return new Polynomial(list);
+    }
+
+    private Polynomial trimCoefficients() {
+        for (int i = this.getDegree() - 1; i > 0; i--) {
             if (this.getCoefficients().get(i) == 0) {
                 this.getCoefficients().remove(i);
             } else {
@@ -139,6 +153,16 @@ public class Polynomial {
             }
         }
         return this;
+    }
+
+    private boolean isHighestCoefficientsSameSign(Polynomial a, Polynomial b) {
+        int coeffA = a.getCoefficients().get(a.getDegree() - 1);
+        int coeffB = b.getCoefficients().get(b.getDegree() - 1);
+        if (coeffA > 0 && coeffB > 0) {
+            return true;
+        } else {
+            return coeffA < 0 && coeffB < 0;
+        }
     }
 
     @Override

@@ -48,10 +48,9 @@ public class CalculateHelper {
         LRP multiplyedBy3x3x = lrp1.multiply(lrp.getGenerator());
         System.out.println("Получим последовательность: " + multiplyedBy3x3x.getSequence(20));
         System.out.println("Генератор новой последовательности: " + multiplyedBy3x3x.getGenerator());
-        Polynomial newPolynomial1 = new Polynomial(Arrays.asList(-2, 0, 1));
-        Polynomial newPolynomial2 = new Polynomial(Arrays.asList(1, 1));
+        Polynomial newPolynomial1 = new Polynomial(Arrays.asList(1, 0, 2));
+        Polynomial newPolynomial2 = new Polynomial(Arrays.asList(-1, 1));
         Polynomial divide = newPolynomial1.divide(newPolynomial2);
-        System.out.println(newPolynomial1 + " / " + newPolynomial2 + " = " + divide + (divide.getRemainder() == null ?
-                "" : " (остаток " + divide.getRemainder() + ")"));
+        System.out.println(newPolynomial1 + " / " + newPolynomial2 + " = " + divide + " (остаток " + divide.getRemainder() + ")");
     }
 }
