@@ -35,7 +35,7 @@ public class Polynomial {
     }
 
     public int getDegree() {
-        return coefficients.size();
+        return coefficients.size() - 1;
     }
 
     public int getHighestCoefficient() {
@@ -49,6 +49,17 @@ public class Polynomial {
     }
 
     public Polynomial divide(Polynomial polynomial) {
+        if (polynomial.getDegree() == 0) {
+            this.setRemainder(new Polynomial(Collections.singletonList(0)));
+            switch (polynomial.getCoefficients().get(0)) {
+                case 0:
+                    return null;
+                case 1:
+                    return this;
+                case -1:
+                    return this.revert();
+            }
+        }
         int tempDegree = this.trimCoefficients().getDegree() - polynomial.trimCoefficients().getDegree();
         int tempCoefficient = this.getHighestCoefficient() / polynomial.getHighestCoefficient();
         Polynomial result = getMonomial(tempDegree, tempCoefficient);
@@ -61,13 +72,9 @@ public class Polynomial {
         return result;
     }
 
-    public Polynomial getGSD(Polynomial polynomial) {
-        return this;
-    }
-
     public Polynomial multiply(Polynomial polynomial) {
         Polynomial result = new Polynomial(Collections.singletonList(0));
-        for (int i = 0; i < polynomial.getDegree(); i++) {
+        for (int i = 0; i < polynomial.getCoefficients().size(); i++) {
             Polynomial tempMultiply = this.multiply(polynomial.getCoefficients().get(i), i);
             result = result.sum(tempMultiply);
         }
@@ -79,6 +86,8 @@ public class Polynomial {
             return new Polynomial(Collections.singletonList(0));
         } else if (coefficient == 1 && degree == 0) {
             return this;
+        } else if (coefficient == -1 && degree == 0) {
+            return this.revert();
         } else {
             List<Integer> coefficients = new ArrayList<>(this.coefficients);
             List<Integer> newCoefficients = getEmptyList(coefficients.size() + degree);
@@ -94,13 +103,11 @@ public class Polynomial {
     }
 
     public Polynomial sum(Polynomial polynomial) {
-        List<Integer> coefficients = new ArrayList<>(this.coefficients);
-        if (polynomial.getDegree() > coefficients.size()) {
-            for (int i = 0; i <= polynomial.getDegree() - coefficients.size(); i++) {
-                coefficients.add(0);
-            }
+        List<Integer> coefficients = getEmptyList(Math.max(this.getCoefficients().size(), polynomial.getCoefficients().size()));
+        for (int i = 0; i < this.coefficients.size(); i++) {
+            coefficients.set(i, coefficients.get(i) + this.coefficients.get(i));
         }
-        for (int i = 0; i < Math.min(coefficients.size(), polynomial.getDegree()); i++) {
+        for (int i = 0; i < polynomial.getCoefficients().size(); i++) {
             coefficients.set(i, coefficients.get(i) + polynomial.getCoefficients().get(i));
         }
         return new Polynomial(coefficients).trimCoefficients();
@@ -111,20 +118,7 @@ public class Polynomial {
         for (int i = 0; i < coefficients.size(); i++) {
             coefficients.set(i, coefficients.get(i) * -1);
         }
-        return new Polynomial(coefficients);
-    }
-
-    public boolean isBiggerThan(Polynomial polynomial) {
-        List<Integer> coefficientsA = this.getCoefficients();
-        List<Integer> coefficientsB = polynomial.coefficients;
-        if (coefficientsA.size() == coefficientsB.size()) {
-            for (int i = coefficientsA.size() - 1; i >= 0; i--) {
-                if (!coefficientsA.get(i).equals(coefficientsB.get(i))) {
-                    return coefficientsA.get(i) > coefficientsB.get(i);
-                }
-            }
-        }
-        return coefficientsA.size() > coefficientsB.size();
+        return new Polynomial(coefficients, remainder);
     }
 
     private List<Integer> getEmptyList(int size) {
@@ -145,7 +139,7 @@ public class Polynomial {
     }
 
     private Polynomial trimCoefficients() {
-        for (int i = this.getDegree() - 1; i > 0; i--) {
+        for (int i = this.getDegree(); i > 0; i--) {
             if (this.getCoefficients().get(i) == 0) {
                 this.getCoefficients().remove(i);
             } else {
@@ -153,16 +147,6 @@ public class Polynomial {
             }
         }
         return this;
-    }
-
-    private boolean isHighestCoefficientsSameSign(Polynomial a, Polynomial b) {
-        int coeffA = a.getCoefficients().get(a.getDegree() - 1);
-        int coeffB = b.getCoefficients().get(b.getDegree() - 1);
-        if (coeffA > 0 && coeffB > 0) {
-            return true;
-        } else {
-            return coeffA < 0 && coeffB < 0;
-        }
     }
 
     @Override
