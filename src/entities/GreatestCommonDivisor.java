@@ -1,5 +1,7 @@
 package entities;
 
+import java.util.Collections;
+
 public class GreatestCommonDivisor {
 
     private final Polynomial one;
@@ -32,6 +34,10 @@ public class GreatestCommonDivisor {
             calculateGCD(two, remainder);
         }
         return two;
+    }
+
+    private Polynomial getMonomial() {
+        return new Polynomial(Collections.singletonList(1));
     }
 
     @Override

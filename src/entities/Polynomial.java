@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class Polynomial {
+public class Polynomial extends Field {
 
     private List<Integer> coefficients;
     private Polynomial remainder;
@@ -14,12 +14,16 @@ public class Polynomial {
     }
 
     public Polynomial(List<Integer> coefficients) {
-        this.coefficients = coefficients;
+        this.coefficients = convertToField(coefficients);
     }
 
     public Polynomial(List<Integer> coefficients, Polynomial remainder) {
-        this.coefficients = coefficients;
+        this.coefficients = convertToField(coefficients);
         this.remainder = remainder;
+    }
+
+    public int getModF() {
+        return modF;
     }
 
     public List<Integer> getCoefficients() {
@@ -60,8 +64,14 @@ public class Polynomial {
                     return this.revert();
             }
         }
+        if (this.getDegree() == 0) {
+            return getNullPolynomial();
+        }
+        if (polynomial.getHighestCoefficient() > 1 || polynomial.getHighestCoefficient() < -1) {
+            polynomial = polynomial.normalize();
+        }
         int tempDegree = this.trimCoefficients().getDegree() - polynomial.trimCoefficients().getDegree();
-        int tempCoefficient = this.getHighestCoefficient() / polynomial.getHighestCoefficient();
+        int tempCoefficient = (this.getHighestCoefficient() * getReverseNumber(polynomial.getHighestCoefficient()) % modF);
         Polynomial result = getMonomial(tempDegree, tempCoefficient);
         Polynomial remainder = this.subtract(result.multiply(polynomial));
         result.setRemainder(remainder);
@@ -92,25 +102,28 @@ public class Polynomial {
             List<Integer> coefficients = new ArrayList<>(this.coefficients);
             List<Integer> newCoefficients = getEmptyList(coefficients.size() + degree);
             for (int i = 0; i < coefficients.size(); i++) {
-                newCoefficients.set(i + degree, coefficients.get(i) * coefficient);
+                newCoefficients.set(i + degree, (coefficients.get(i) * coefficient) % modF);
             }
             return new Polynomial(newCoefficients).trimCoefficients();
         }
     }
 
     public Polynomial subtract(Polynomial polynomial) {
-        return this.sum(polynomial.revert()).trimCoefficients();
+        return this.sum(polynomial.revert()).trimCoefficients().convertToField();
     }
 
     public Polynomial sum(Polynomial polynomial) {
-        List<Integer> coefficients = getEmptyList(Math.max(this.getCoefficients().size(), polynomial.getCoefficients().size()));
-        for (int i = 0; i < this.coefficients.size(); i++) {
-            coefficients.set(i, coefficients.get(i) + this.coefficients.get(i));
+        if (this.coefficients.size() > polynomial.getCoefficients().size()) {
+            for (int i = 0; i < polynomial.getCoefficients().size(); i++) {
+                this.coefficients.set(i, (polynomial.getCoefficients().get(i) + this.coefficients.get(i)) % modF);
+            }
+            return this;
+        } else {
+            for (int i = 0; i < this.coefficients.size(); i++) {
+                polynomial.getCoefficients().set(i, (polynomial.getCoefficients().get(i) + this.coefficients.get(i)) % modF);
+            }
+            return polynomial;
         }
-        for (int i = 0; i < polynomial.getCoefficients().size(); i++) {
-            coefficients.set(i, coefficients.get(i) + polynomial.getCoefficients().get(i));
-        }
-        return new Polynomial(coefficients).trimCoefficients();
     }
 
     public Polynomial revert() {
@@ -147,6 +160,38 @@ public class Polynomial {
             }
         }
         return this;
+    }
+
+    private int getReverseNumber(int number) {
+        while (number < 0) {
+            number += modF;
+        }
+        for (int i = 0; i < modF; i++) {
+            if ((number * i) % modF == 1) {
+                return i;
+            }
+        }
+        return 999999999;
+    }
+
+    private List<Integer> convertToField(List<Integer> coefficients) {
+        ArrayList<Integer> res = new ArrayList<>();
+        coefficients.forEach(c -> res.add(c % modF));
+        return res;
+    }
+
+    private Polynomial convertToField() {
+        return new Polynomial(convertToField(this.coefficients));
+    }
+
+    public Polynomial normalize() {
+        return this.multiply(new Polynomial(Collections.singletonList(getReverseNumber(this.getHighestCoefficient()))));
+    }
+
+    private Polynomial getNullPolynomial() {
+        Polynomial temp = new Polynomial(Collections.singletonList(0));
+        temp.setRemainder(new Polynomial(Collections.singletonList(0)));
+        return temp;
     }
 
     @Override

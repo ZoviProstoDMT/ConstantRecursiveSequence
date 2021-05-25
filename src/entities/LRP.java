@@ -66,10 +66,19 @@ public class LRP {
         return new LRP(recurrentRelation, calculatedSequence.subList(0, recurrentRelation.getDegree()));
     }
 
-    public LRP multiply(Polynomial polynomial) {
-        LRP result = this;
+    public List<Integer> multiply(Polynomial polynomial, int numberOfMembers) {
+        List<Integer> result = getEmptyList(numberOfMembers);
         for (int i = 0; i < polynomial.getCoefficients().size(); i++) {
-            result = result.multiply(i, polynomial.getCoefficients().get(i));
+            LRP lrp = this.multiply(i, polynomial.getCoefficients().get(i));
+            result = sum(result, lrp.getSequence(numberOfMembers));
+        }
+        return result;
+    }
+
+    private List<Integer> sum(List<Integer> one, List<Integer> two) {
+        List<Integer> result = new ArrayList<>();
+        for (int i = 0; i < one.size(); i++) {
+            result.add((one.get(i) + two.get(i)) % recurrentRelation.getModF());
         }
         return result;
     }
@@ -99,34 +108,9 @@ public class LRP {
         return new Polynomial(coefficientsForPolynomial);
     }
 
-    public List<Integer> getSubSequence(int numberOfMember) {
-        if (sequence.size() > numberOfMember + recurrentRelation.getDegree()) {
-            return sequence.subList(numberOfMember, numberOfMember + recurrentRelation.getDegree());
-        } else {
-            List<Integer> sequence = calculateSequence(numberOfMember + recurrentRelation.getDegree());
-            return sequence.subList(numberOfMember, numberOfMember + recurrentRelation.getDegree());
-        }
-    }
-
-    public List<List<Integer>> getStateMatrix() {
-        List<List<Integer>> result = new ArrayList<>();
-        List<Integer> firstState = getSubSequence(0);
-        result.add(firstState);
-        int i = 1;
-        while (true) {
-            List<Integer> nextState = getSubSequence(i);
-            if (nextState.equals(firstState)) {
-                break;
-            }
-            result.add(nextState);
-            i++;
-        }
-        return result;
-    }
-
     private List<Integer> getEmptyList(int size) {
         List<Integer> list = new ArrayList<>();
-        for (int i = 0; i < recurrentRelation.getDegree(); i++) {
+        for (int i = 0; i < size; i++) {
             list.add(0);
         }
         return list;
