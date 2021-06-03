@@ -31,9 +31,9 @@ public class GreatestCommonDivisor {
         if (remainder.getDegree() == 0 && remainder.getCoefficients().get(0) == 0) {
             return two;
         } else {
-            calculateGCD(two, remainder);
+            remainder = calculateGCD(two, remainder);
         }
-        return two;
+        return remainder;
     }
 
     private Polynomial getMonomial() {

@@ -6,28 +6,39 @@ import java.util.List;
 public class LRP {
 
     private final RecurrentRelation recurrentRelation;
-    private final List<Integer> u0;
-    private List<Integer> sequence;
+    private final List<Integer> initialVector;
 
-    public LRP(RecurrentRelation recurrentRelation, List<Integer> u0) {
+    public LRP(RecurrentRelation recurrentRelation, List<Integer> initialVector) {
         this.recurrentRelation = recurrentRelation;
-        this.u0 = u0;
+        this.initialVector = initialVector;
     }
 
-    public List<Integer> getU0() {
-        return u0;
+    public List<Integer> getInitialVector() {
+        return initialVector;
     }
 
     public List<Integer> getSequence(int numberOfMembers) {
-        sequence = calculateSequence(numberOfMembers);
-        return sequence;
+        return calculateSequence(numberOfMembers);
+    }
+
+    public Polynomial getCharacteristicPolynomial() {
+        return new Polynomial(recurrentRelation);
+    }
+
+    public LRP getImpulse() {
+        List<Integer> vector = getEmptyList(recurrentRelation.getDegree());
+        vector.set(vector.size() - 1, 1);
+        return new LRP(recurrentRelation, vector);
     }
 
     private List<Integer> calculateSequence(int numberOfMembers) {
-        List<Integer> resultSequence = new ArrayList<>(u0);
-        List<Integer> tempU0 = new ArrayList<>(u0);
-        for (int i = 0; i < numberOfMembers - u0.size(); i++) {
+        List<Integer> resultSequence = new ArrayList<>(initialVector);
+        List<Integer> tempU0 = new ArrayList<>(initialVector);
+        for (int i = 0; i < numberOfMembers - initialVector.size(); i++) {
             int nextMemberOfSequence = getNextMemberOfSequence(recurrentRelation, tempU0);
+            while (nextMemberOfSequence < 0) {
+                nextMemberOfSequence += recurrentRelation.getModF();
+            }
             tempU0 = makeALeftShiftForSequence(tempU0, nextMemberOfSequence);
             resultSequence.add(nextMemberOfSequence);
         }
@@ -86,15 +97,14 @@ public class LRP {
     public Polynomial getGenerator() {
         int degree = recurrentRelation.getDegree();
         List<Integer> coefficientsForPolynomial = getEmptyList(degree);
-        Polynomial polynomial = new Polynomial(recurrentRelation);
-        List<Integer> f = polynomial.getCoefficients();
-        coefficientsForPolynomial.set(degree - 1, u0.get(0));
+        List<Integer> f = recurrentRelation.getCoefficients();
+        coefficientsForPolynomial.set(degree - 1, initialVector.get(0));
         for (int i = 1; i <= degree - 1; i++) {
-            int result = u0.get(i);
+            int result = initialVector.get(i);
             boolean nextStep = false;
             for (int j = degree - 1; !nextStep; ) {
                 for (int ii = i - 1; ii >= 0; ii--) {
-                    result -= f.get(j) * u0.get(ii);
+                    result -= f.get(j) * initialVector.get(ii);
                     result %= recurrentRelation.getModF();
                     j--;
                     if (ii == 0) {
@@ -114,5 +124,10 @@ public class LRP {
             list.add(0);
         }
         return list;
+    }
+
+    @Override
+    public String toString() {
+        return getCharacteristicPolynomial().toString();
     }
 }

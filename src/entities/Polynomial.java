@@ -62,6 +62,10 @@ public class Polynomial extends Field {
                     return this;
                 case -1:
                     return this.revert();
+                default:
+                    Polynomial result = this.multiply(getReverseNumber(polynomial.getCoefficients().get(0)), 0);
+                    result.setRemainder(new Polynomial(Collections.singletonList(0)));
+                    return result;
             }
         }
         if (this.getDegree() == 0) {
@@ -76,8 +80,9 @@ public class Polynomial extends Field {
         Polynomial remainder = this.subtract(result.multiply(polynomial));
         result.setRemainder(remainder);
         if (result.getRemainder().getDegree() >= polynomial.getDegree()) {
-            result = result.sum(result.getRemainder().divide(polynomial));
-            result.setRemainder(this.subtract(result.multiply(polynomial)));
+            Polynomial tempDivide = result.getRemainder().divide(polynomial);
+            result = result.sum(tempDivide);
+            result.setRemainder(tempDivide.getRemainder());
         }
         return result;
     }
@@ -176,7 +181,12 @@ public class Polynomial extends Field {
 
     private List<Integer> convertToField(List<Integer> coefficients) {
         ArrayList<Integer> res = new ArrayList<>();
-        coefficients.forEach(c -> res.add(c % modF));
+        coefficients.forEach(c -> {
+            while (c < 0) {
+                c += modF;
+            }
+            res.add(c % modF);
+        });
         return res;
     }
 
