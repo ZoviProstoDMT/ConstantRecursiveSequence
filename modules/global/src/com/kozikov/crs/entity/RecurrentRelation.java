@@ -1,25 +1,23 @@
-package entities;
+package com.kozikov.crs.entity;
 
+import com.haulmont.chile.core.annotations.MetaClass;
+
+import java.io.Serializable;
 import java.util.List;
 
-public class RecurrentRelation {
+@MetaClass(name = "crs_RecurrentRelation")
+public class RecurrentRelation implements Serializable {
 
-    private final int modF;
-    private final int degree;
+    private transient static final long serialVersionUID = 1L;
+
+    private final Integer modF;
+    private final Integer degree;
     private final List<Integer> coefficients;
 
-    public RecurrentRelation(int modF, List<Integer> coefficients) {
-        this.modF = modF;
-        this.degree = coefficients.size();
+    public RecurrentRelation(List<Integer> coefficients, int modF) {
         this.coefficients = coefficients;
-    }
-
-    public int getModF() {
-        return modF;
-    }
-
-    public int getDegree() {
-        return degree;
+        this.degree = coefficients.size();
+        this.modF = modF;
     }
 
     public List<Integer> getCoefficients() {
@@ -57,5 +55,13 @@ public class RecurrentRelation {
             }
         }
         return String.valueOf(recurrentRelation);
+    }
+
+    public int getDegree() {
+        return degree;
+    }
+
+    public int getModF() {
+        return modF;
     }
 }

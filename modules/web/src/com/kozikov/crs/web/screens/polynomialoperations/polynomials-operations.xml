@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://polynomialsOperations.caption"
+        messagesPack="com.kozikov.crs.web.screens.polynomialoperations">
+    <layout spacing="true" margin="true">
+        <vbox id="mainbox" width="100%" align="TOP_CENTER" height="100%" expand="resultBoxx">
+            <label value="msg://label.value" stylename="h1 bold" align="TOP_CENTER"/>
+            <vbox spacing="true">
+            </vbox>
+            <hbox width="100%" align="MIDDLE_CENTER" margin="true,false,true,false">
+                <vbox id="infoBox" margin="true,false,false,false" spacing="true" align="MIDDLE_CENTER">
+                    <label id="infoBoxLabel" value="msg://infoBoxLabel.value" align="MIDDLE_CENTER"/>
+                    <textField id="moduleField" inputPrompt="msg://modFField.caption" align="MIDDLE_CENTER"
+                               required="true">
+                        <validators>
+                            <digits message="msg://moduleField.digits" fraction="0" integer="1"/>
+                        </validators>
+                    </textField>
+                    <lookupField id="operationField" optionsEnum="com.kozikov.crs.entity.ArithmeticOperations" align="MIDDLE_CENTER"
+                                 inputPrompt="msg://lookupField.caption" required="true"/>
+                </vbox>
+                <vbox id="polynomialsBox" width="100%" spacing="true" align="MIDDLE_CENTER" margin="true,false,false,false">
+                    <label value="msg://polynomialFields.caption" align="MIDDLE_CENTER"/>
+                    <textField id="polynomialOneField" align="MIDDLE_CENTER"
+                               inputPrompt="msg://polynomialOneField.inputPrompt" required="true"
+                               textChangeEventMode="TIMEOUT" textChangeTimeout="1000"/>
+                    <textField id="polynomialTwoField" align="MIDDLE_CENTER"
+                               inputPrompt="msg://polynomialTwoField.inputPrompt" required="true"
+                               textChangeEventMode="TIMEOUT" textChangeTimeout="1000"/>
+                </vbox>
+            </hbox>
+            <vbox spacing="true">
+            </vbox>
+            <button id="calculateBtn" align="MIDDLE_CENTER" caption="msg://button.caption" stylename="primary"/>
+            <vbox spacing="true"/>
+            <vbox id="resultBoxx" spacing="true" margin="true" expand="rsultzBox" align="TOP_CENTER" width="50%">
+                <hbox margin="true" align="TOP_CENTER" width="100%" css="border-bottom: solid 2px black">
+                    <label id="polynomialOneLabel" align="TOP_CENTER" stylename="h2" css="font-size: 25pt"/>
+                    <label id="operationLabel" align="TOP_CENTER" stylename="h2" css="font-size: 25pt"/>
+                    <label id="polynomialTwoLabel" align="TOP_CENTER" stylename="h2" css="font-size: 25pt"/>
+                </hbox>
+                <hbox id="rsultzBox" spacing="true" align="TOP_CENTER"
+                      margin="false,false,true,false" width="100%">
+                    <label id="resultLabel" stylename="h1 bold" align="TOP_CENTER" css="font-size: 50pt"/>
+                </hbox>
+            </vbox>
+        </vbox>
+    </layout>
+</window>

@@ -1,25 +1,18 @@
-package entities;
+package com.kozikov.crs.entity;
+
+import com.haulmont.chile.core.annotations.MetaClass;
 
 import java.util.Collections;
 
+@MetaClass(name = "crs_GreatestCommonDivisor")
 public class GreatestCommonDivisor {
 
-    private final Polynomial one;
-    private final Polynomial two;
+    private final Integer modF;
     private final Polynomial gcd;
 
     public GreatestCommonDivisor(Polynomial one, Polynomial two) {
-        this.one = one;
-        this.two = two;
+        this.modF = one.getModF();
         gcd = calculateGCD(one, two);
-    }
-
-    public Polynomial getOne() {
-        return one;
-    }
-
-    public Polynomial getTwo() {
-        return two;
     }
 
     public Polynomial getGcdResult() {
@@ -37,11 +30,15 @@ public class GreatestCommonDivisor {
     }
 
     private Polynomial getMonomial() {
-        return new Polynomial(Collections.singletonList(1));
+        return new Polynomial(Collections.singletonList(1), modF);
     }
 
     @Override
     public String toString() {
         return String.valueOf(gcd);
+    }
+
+    public int getModF() {
+        return modF;
     }
 }

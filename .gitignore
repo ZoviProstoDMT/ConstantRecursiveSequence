@@ -1,18 +1,11 @@
-# Intellij
-.idea/
+.gradle
+.studio
+*.ipr
 *.iml
 *.iws
-/out/
-
-# Maven
-log/
-target/
-
-# Default ignored files
-/shelf/
-/workspace.xml
-# Datasource local storage ignored files
-/../../../../../../../../:\Users\kozik\IdeaProjects\SSAU\Azovskaya\ConstantRecursiveSequence\.idea/dataSources/
-/dataSources.local.xml
-# Editor-based HTTP Client requests
-/httpRequests/
+build/*
+deploy/*
+modules/*/build/*
+.idea/*
+out
+test-run

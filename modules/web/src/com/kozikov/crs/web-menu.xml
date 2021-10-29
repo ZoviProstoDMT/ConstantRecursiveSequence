@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<menu-config xmlns="http://schemas.haulmont.com/cuba/menu.xsd">
+    <menu id="application-crs" insertBefore="administration" caption="mainMsg://menu_config.application-crs">
+        <item screen="crs_PolynomialsOperations" caption="mainMsg://menu_config.crs_PolynomialsOperations"/>
+        <item screen="crs_MinimalPolynomial" caption="mainMsg://menu_config.crs_MinimalPolynomial"/>
+    </menu>
+</menu-config>

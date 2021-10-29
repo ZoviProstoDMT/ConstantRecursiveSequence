@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://minimalPolynomial.caption"
+        messagesPack="com.kozikov.crs.web.screens.minymalpolynomial">
+    <layout spacing="true" margin="true">
+        <vbox id="mainbox" width="100%" align="TOP_CENTER" height="100%" expand="resultBoxx">
+            <label value="msg://label.value" stylename="h1 bold" align="TOP_CENTER"/>
+            <vbox spacing="true">
+            </vbox>
+            <vbox spacing="true" margin="true" css="border: 1px solid black">
+                <hbox width="100%" align="MIDDLE_CENTER" margin="true,false,false,false">
+                    <vbox id="infoBox" margin="true,false,false,false" spacing="true" align="MIDDLE_CENTER">
+                        <textField id="moduleField" inputPrompt="msg://modFField.caption" align="MIDDLE_CENTER"
+                                   required="true"/>
+                    </vbox>
+                    <vbox id="relationBox" width="100%" spacing="true" align="MIDDLE_CENTER" margin="true,false,false,false">
+                        <textField id="relationField" align="MIDDLE_CENTER"
+                                   inputPrompt="msg://recurrentRelation" required="true"
+                        />
+                    </vbox>
+                    <vbox id="vectorBox" width="100%" spacing="true" align="MIDDLE_CENTER" margin="true,false,false,false">
+                        <textField id="initialVectorField" align="MIDDLE_CENTER"
+                                   inputPrompt="msg://initialVectorField.inputPrompt" required="true"
+                        />
+                    </vbox>
+                </hbox>
+                <vbox spacing="true">
+                </vbox>
+                <hbox align="MIDDLE_CENTER" margin="false,true,true,true">
+                    <button id="calculateBtn" align="MIDDLE_CENTER" caption="msg://button.caption" stylename="primary"/>
+                </hbox>
+            </vbox>
+            <vbox spacing="true"/>
+            <vbox id="resultBoxx" spacing="true" margin="true" align="TOP_CENTER" width="100%" expand="resultsBox">
+                <hbox id="resultsBox" width="100%">
+                    <vbox spacing="true" height="50%" width="100%" align="TOP_CENTER">
+                        <textField id="recurrentRelationField" caption="msg://recurrentRelationField.caption" align="MIDDLE_CENTER"
+                                   editable="false"/>
+                        <textField id="sequenceField" caption="msg://sequenceField.caption" align="MIDDLE_CENTER"
+                                   editable="false"/>
+                    </vbox>
+                    <vbox width="100%" height="50%" spacing="true" align="TOP_CENTER">
+                        <textField id="characteristicPolynomialField" editable="false"
+                                   caption="msg://characteristicPolynomialCaption.value" align="MIDDLE_CENTER"/>
+                        <textField id="generatorField" caption="msg://generatorField.caption" align="MIDDLE_CENTER"
+                                   editable="false"/>
+                        <textField id="minimalPolynomialField" align="MIDDLE_CENTER"
+                                   caption="msg://minimalPolynomialField.caption" editable="false"/>
+                    </vbox>
+                </hbox>
+            </vbox>
+        </vbox>
+    </layout>
+</window>
