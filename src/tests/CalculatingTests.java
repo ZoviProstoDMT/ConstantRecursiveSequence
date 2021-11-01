@@ -23,9 +23,9 @@ public class CalculatingTests {
         boolean test1 = genSeq1.equals(seq1);
 
         LRP lrp2 = new LRP(new RecurrentRelation(4, Arrays.asList(-1, 3, -1, 2)), Arrays.asList(3, -3, 1, 2));
-        List<Integer> getSeq2 = lrp2.getImpulse().multiply(lrp2.getGenerator(), 20);
+        List<Integer> genSeq2 = lrp2.getImpulse().multiply(lrp2.getGenerator(), 20);
         List<Integer> seq2 = lrp2.getSequence(20);
-        boolean test2 = getSeq2.equals(seq2);
+        boolean test2 = genSeq2.equals(seq2);
 
         LRP lrp3 = new LRP(new RecurrentRelation(11, Arrays.asList(-1, 3, -1, 2, 11, 0, 2)), Arrays.asList(3, -3, 1, 2, 3, 4, 5));
         List<Integer> genSeq3 = lrp3.getImpulse().multiply(lrp3.getGenerator(), 20);

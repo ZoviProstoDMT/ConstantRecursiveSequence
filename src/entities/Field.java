@@ -2,7 +2,7 @@ package entities;
 
 public class Field {
 
-    protected int modF = 5;
+    protected int modF = 7;
 
     public Field(int modF) {
         this.modF = modF;

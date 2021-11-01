@@ -1,8 +1,6 @@
 package entities;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class Polynomial extends Field {
 
@@ -202,6 +200,30 @@ public class Polynomial extends Field {
         Polynomial temp = new Polynomial(Collections.singletonList(0));
         temp.setRemainder(new Polynomial(Collections.singletonList(0)));
         return temp;
+    }
+
+    public int getExp() {
+        int startDegree = coefficients.size() - 1;
+        Polynomial startPolynomial = new Polynomial(coefficients.subList(0, coefficients.size() - 1)).revert();
+        Map<Integer, Polynomial> polynomialMap = new HashMap<>();
+        polynomialMap.put(startDegree, startPolynomial);
+        for (int i = 0; i < 5; i++) {
+            System.out.println("X^" + startDegree + " = " + startPolynomial);
+            startDegree++;
+            Polynomial tempPolynomial = startPolynomial.multiply(new Polynomial(Arrays.asList(0, 1)));
+            int olderDegree = tempPolynomial.getCoefficients().size() - 1;
+            int olderCoefficient = tempPolynomial.getCoefficients().get(olderDegree);
+            System.out.println("X^" + startDegree + " = " + tempPolynomial);
+            System.out.printf("Older degree: %s, Older coefficient: %s%n", olderDegree, olderCoefficient);
+            tempPolynomial.getCoefficients().remove(olderDegree);
+            tempPolynomial.trimCoefficients();
+            Polynomial polynomialFromMap = new Polynomial(polynomialMap.get(olderDegree).getCoefficients());
+            Polynomial multipliedToOlderCoefficient = polynomialFromMap.multiply(olderCoefficient, 0);
+            System.out.printf("%s * (%s) = %s%n", olderCoefficient, polynomialFromMap, multipliedToOlderCoefficient);
+            System.out.println("X^" + startDegree + " = " + tempPolynomial + " + " + multipliedToOlderCoefficient);
+            startPolynomial = tempPolynomial.sum(multipliedToOlderCoefficient);
+        }
+        return 0;
     }
 
     @Override
