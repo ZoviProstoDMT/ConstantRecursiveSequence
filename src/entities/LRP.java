@@ -3,7 +3,7 @@ package entities;
 import java.util.ArrayList;
 import java.util.List;
 
-public class LRP {
+public class LRP extends Field {
 
     private final RecurrentRelation recurrentRelation;
     private final List<Integer> initialVector;
@@ -37,7 +37,7 @@ public class LRP {
         for (int i = 0; i < numberOfMembers - initialVector.size(); i++) {
             int nextMemberOfSequence = getNextMemberOfSequence(recurrentRelation, tempU0);
             while (nextMemberOfSequence < 0) {
-                nextMemberOfSequence += recurrentRelation.getModF();
+                nextMemberOfSequence += Field.modF;
             }
             tempU0 = makeALeftShiftForSequence(tempU0, nextMemberOfSequence);
             resultSequence.add(nextMemberOfSequence);
@@ -47,7 +47,6 @@ public class LRP {
 
     private int getNextMemberOfSequence(RecurrentRelation recurrentRelation, List<Integer> u0) {
         int result = 0;
-        int modF = recurrentRelation.getModF();
         if (u0.size() > recurrentRelation.getCoefficients().size()) {
             u0 = u0.subList(u0.size() - recurrentRelation.getCoefficients().size(), u0.size() - 1);
         }
@@ -71,7 +70,7 @@ public class LRP {
                 calculatedSequence = calculatedSequence.subList(degreeOfMonomial, calculatedSequence.size() - 1);
             }
             for (int i = 0; i < calculatedSequence.size(); i++) {
-                calculatedSequence.set(i, (calculatedSequence.get(i) * coefficientOfMonomial) % recurrentRelation.getModF());
+                calculatedSequence.set(i, (calculatedSequence.get(i) * coefficientOfMonomial) % modF);
             }
         }
         return new LRP(recurrentRelation, calculatedSequence.subList(0, recurrentRelation.getDegree()));
@@ -89,7 +88,7 @@ public class LRP {
     private List<Integer> sum(List<Integer> one, List<Integer> two) {
         List<Integer> result = new ArrayList<>();
         for (int i = 0; i < one.size(); i++) {
-            result.add((one.get(i) + two.get(i)) % recurrentRelation.getModF());
+            result.add((one.get(i) + two.get(i)) % modF);
         }
         return result;
     }
@@ -105,7 +104,7 @@ public class LRP {
             for (int j = degree - 1; !nextStep; ) {
                 for (int ii = i - 1; ii >= 0; ii--) {
                     result -= f.get(j) * initialVector.get(ii);
-                    result %= recurrentRelation.getModF();
+                    result %= modF;
                     j--;
                     if (ii == 0) {
                         nextStep = true;

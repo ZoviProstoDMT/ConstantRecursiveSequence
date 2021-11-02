@@ -20,10 +20,6 @@ public class Polynomial extends Field {
         this.remainder = remainder;
     }
 
-    public int getModF() {
-        return modF;
-    }
-
     public List<Integer> getCoefficients() {
         return coefficients;
     }
@@ -203,27 +199,29 @@ public class Polynomial extends Field {
     }
 
     public int getExp() {
+        int degree = coefficients.size() - 1;
         int startDegree = coefficients.size() - 1;
-        Polynomial startPolynomial = new Polynomial(coefficients.subList(0, coefficients.size() - 1)).revert();
-        Map<Integer, Polynomial> polynomialMap = new HashMap<>();
-        polynomialMap.put(startDegree, startPolynomial);
-        for (int i = 0; i < 5; i++) {
-            System.out.println("X^" + startDegree + " = " + startPolynomial);
-            startDegree++;
-            Polynomial tempPolynomial = startPolynomial.multiply(new Polynomial(Arrays.asList(0, 1)));
+        Polynomial polynomial = new Polynomial(coefficients.subList(0, coefficients.size() - 1)).revert().trimCoefficients();
+        Polynomial startPolynomial = new Polynomial(polynomial.getCoefficients());
+        while (true) {
+            degree++;
+            Polynomial tempPolynomial = polynomial.multiply(new Polynomial(Arrays.asList(0, 1)));
             int olderDegree = tempPolynomial.getCoefficients().size() - 1;
             int olderCoefficient = tempPolynomial.getCoefficients().get(olderDegree);
-            System.out.println("X^" + startDegree + " = " + tempPolynomial);
-            System.out.printf("Older degree: %s, Older coefficient: %s%n", olderDegree, olderCoefficient);
+            if (olderDegree != startDegree) {
+                polynomial = tempPolynomial;
+                continue;
+            }
             tempPolynomial.getCoefficients().remove(olderDegree);
             tempPolynomial.trimCoefficients();
-            Polynomial polynomialFromMap = new Polynomial(polynomialMap.get(olderDegree).getCoefficients());
-            Polynomial multipliedToOlderCoefficient = polynomialFromMap.multiply(olderCoefficient, 0);
-            System.out.printf("%s * (%s) = %s%n", olderCoefficient, polynomialFromMap, multipliedToOlderCoefficient);
-            System.out.println("X^" + startDegree + " = " + tempPolynomial + " + " + multipliedToOlderCoefficient);
-            startPolynomial = tempPolynomial.sum(multipliedToOlderCoefficient);
+            Polynomial multipliedToOlderCoefficient = new Polynomial(startPolynomial.getCoefficients()).multiply(olderCoefficient, 0);
+            polynomial = tempPolynomial.sum(multipliedToOlderCoefficient);
+            polynomial.trimCoefficients();
+            if (polynomial.getCoefficients().size() == 1 && polynomial.getCoefficients().get(0) == 1) {
+                break;
+            }
         }
-        return 0;
+        return degree;
     }
 
     @Override

@@ -4,18 +4,12 @@ import java.util.List;
 
 public class RecurrentRelation {
 
-    private final int modF;
     private final int degree;
     private final List<Integer> coefficients;
 
-    public RecurrentRelation(int modF, List<Integer> coefficients) {
-        this.modF = modF;
+    public RecurrentRelation(List<Integer> coefficients) {
         this.degree = coefficients.size();
         this.coefficients = coefficients;
-    }
-
-    public int getModF() {
-        return modF;
     }
 
     public int getDegree() {
