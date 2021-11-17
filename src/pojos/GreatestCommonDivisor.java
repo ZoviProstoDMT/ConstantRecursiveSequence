@@ -1,4 +1,4 @@
-package entities;
+package pojos;
 
 import java.util.Collections;
 

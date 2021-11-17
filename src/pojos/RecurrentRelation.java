@@ -1,4 +1,4 @@
-package entities;
+package pojos;
 
 import java.util.List;
 
@@ -18,6 +18,14 @@ public class RecurrentRelation {
 
     public List<Integer> getCoefficients() {
         return coefficients;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof RecurrentRelation) {
+            return this.coefficients.equals(((RecurrentRelation) obj).coefficients);
+        }
+        return super.equals(obj);
     }
 
     @Override

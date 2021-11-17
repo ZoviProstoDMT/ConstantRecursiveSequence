@@ -1,4 +1,4 @@
-package entities;
+package pojos;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +10,7 @@ public class LRP extends Field {
 
     public LRP(RecurrentRelation recurrentRelation, List<Integer> initialVector) {
         this.recurrentRelation = recurrentRelation;
-        this.initialVector = initialVector;
+        this.initialVector = normalizeCoefficients(initialVector);
     }
 
     public List<Integer> getInitialVector() {
@@ -37,7 +37,7 @@ public class LRP extends Field {
         for (int i = 0; i < numberOfMembers - initialVector.size(); i++) {
             int nextMemberOfSequence = getNextMemberOfSequence(recurrentRelation, tempU0);
             while (nextMemberOfSequence < 0) {
-                nextMemberOfSequence += Field.modF;
+                nextMemberOfSequence += Field.mod;
             }
             tempU0 = makeALeftShiftForSequence(tempU0, nextMemberOfSequence);
             resultSequence.add(nextMemberOfSequence);
@@ -52,8 +52,8 @@ public class LRP extends Field {
         }
         for (int i = 0; i < u0.size(); i++) {
             int member = recurrentRelation.getCoefficients().get(i) * u0.get(i);
-            result += member % modF;
-            result %= modF;
+            result += member % mod;
+            result %= mod;
         }
         return result;
     }
@@ -70,7 +70,7 @@ public class LRP extends Field {
                 calculatedSequence = calculatedSequence.subList(degreeOfMonomial, calculatedSequence.size() - 1);
             }
             for (int i = 0; i < calculatedSequence.size(); i++) {
-                calculatedSequence.set(i, (calculatedSequence.get(i) * coefficientOfMonomial) % modF);
+                calculatedSequence.set(i, (calculatedSequence.get(i) * coefficientOfMonomial) % mod);
             }
         }
         return new LRP(recurrentRelation, calculatedSequence.subList(0, recurrentRelation.getDegree()));
@@ -85,10 +85,14 @@ public class LRP extends Field {
         return result;
     }
 
+    public int getPeriod() {
+        return getCharacteristicPolynomial().getExp();
+    }
+
     private List<Integer> sum(List<Integer> one, List<Integer> two) {
         List<Integer> result = new ArrayList<>();
         for (int i = 0; i < one.size(); i++) {
-            result.add((one.get(i) + two.get(i)) % modF);
+            result.add((one.get(i) + two.get(i)) % mod);
         }
         return result;
     }
@@ -104,7 +108,7 @@ public class LRP extends Field {
             for (int j = degree - 1; !nextStep; ) {
                 for (int ii = i - 1; ii >= 0; ii--) {
                     result -= f.get(j) * initialVector.get(ii);
-                    result %= modF;
+                    result %= mod;
                     j--;
                     if (ii == 0) {
                         nextStep = true;
@@ -117,6 +121,26 @@ public class LRP extends Field {
         return new Polynomial(coefficientsForPolynomial);
     }
 
+    public List<List<LRP>> getCyclicClasses(List<List<Integer>> initialVectors) {
+        List<List<LRP>> cyclicClasses = new ArrayList<>();
+        for (List<Integer> initialVector : initialVectors) {
+            LRP lrp = new LRP(recurrentRelation, initialVector);
+            boolean notEqualsLRP = true;
+            for (List<LRP> cyclicClass : cyclicClasses) {
+                if (!cyclicClass.isEmpty() && cyclicClass.get(0).equals(lrp)) {
+                    cyclicClass.add(lrp);
+                    notEqualsLRP = false;
+                }
+            }
+            if (notEqualsLRP) {
+                List<LRP> list = new ArrayList<>();
+                list.add(lrp);
+                cyclicClasses.add(list);
+            }
+        }
+        return cyclicClasses;
+    }
+
     private List<Integer> getEmptyList(int size) {
         List<Integer> list = new ArrayList<>();
         for (int i = 0; i < size; i++) {
@@ -125,8 +149,51 @@ public class LRP extends Field {
         return list;
     }
 
+    private List<Integer> normalizeCoefficients(List<Integer> coefficients) {
+        ArrayList<Integer> result = new ArrayList<>(coefficients);
+        for (int i = 0; i < result.size(); i++) {
+            while (result.get(i) < 0) {
+                int integer = result.get(i);
+                result.set(i, integer + mod);
+            }
+            result.set(i, result.get(i) % mod);
+        }
+        return result;
+    }
+
+    @Override
+    public int hashCode() {
+        int hashCode = 0;
+        for (Integer integer : getSequence(getPeriod())) {
+            hashCode += 31 * integer;
+        }
+        return hashCode;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof LRP) {
+            if (this == obj) {
+                return true;
+            }
+            if (!this.recurrentRelation.equals(((LRP) obj).recurrentRelation)) {
+                return false;
+            }
+            int exp = this.getCharacteristicPolynomial().getExp();
+            LRP temp = new LRP(this.recurrentRelation, initialVector);
+            for (int i = 0; i < exp; i++) {
+                temp = temp.multiply(i, 1);
+                if (temp.getSequence(exp).equals(((LRP) obj).getSequence(exp))) {
+                    return true;
+                }
+            }
+            return false;
+        }
+        return super.equals(obj);
+    }
+
     @Override
     public String toString() {
-        return getCharacteristicPolynomial().toString();
+        return getCharacteristicPolynomial().toString() + " " + getSequence(10);
     }
 }

@@ -1,4 +1,4 @@
-package entities;
+package pojos;
 
 import java.util.*;
 
@@ -69,7 +69,7 @@ public class Polynomial extends Field {
             polynomial = polynomial.normalize();
         }
         int tempDegree = this.trimCoefficients().getDegree() - polynomial.trimCoefficients().getDegree();
-        int tempCoefficient = (this.getHighestCoefficient() * getReverseNumber(polynomial.getHighestCoefficient()) % modF);
+        int tempCoefficient = (this.getHighestCoefficient() * getReverseNumber(polynomial.getHighestCoefficient()) % mod);
         Polynomial result = getMonomial(tempDegree, tempCoefficient);
         Polynomial remainder = this.subtract(result.multiply(polynomial));
         result.setRemainder(remainder);
@@ -101,7 +101,7 @@ public class Polynomial extends Field {
             List<Integer> coefficients = new ArrayList<>(this.coefficients);
             List<Integer> newCoefficients = getEmptyList(coefficients.size() + degree);
             for (int i = 0; i < coefficients.size(); i++) {
-                newCoefficients.set(i + degree, (coefficients.get(i) * coefficient) % modF);
+                newCoefficients.set(i + degree, (coefficients.get(i) * coefficient) % mod);
             }
             return new Polynomial(newCoefficients).trimCoefficients();
         }
@@ -114,12 +114,12 @@ public class Polynomial extends Field {
     public Polynomial sum(Polynomial polynomial) {
         if (this.coefficients.size() > polynomial.getCoefficients().size()) {
             for (int i = 0; i < polynomial.getCoefficients().size(); i++) {
-                this.coefficients.set(i, (polynomial.getCoefficients().get(i) + this.coefficients.get(i)) % modF);
+                this.coefficients.set(i, (polynomial.getCoefficients().get(i) + this.coefficients.get(i)) % mod);
             }
             return this;
         } else {
             for (int i = 0; i < this.coefficients.size(); i++) {
-                polynomial.getCoefficients().set(i, (polynomial.getCoefficients().get(i) + this.coefficients.get(i)) % modF);
+                polynomial.getCoefficients().set(i, (polynomial.getCoefficients().get(i) + this.coefficients.get(i)) % mod);
             }
             return polynomial;
         }
@@ -163,10 +163,10 @@ public class Polynomial extends Field {
 
     private int getReverseNumber(int number) {
         while (number < 0) {
-            number += modF;
+            number += mod;
         }
-        for (int i = 0; i < modF; i++) {
-            if ((number * i) % modF == 1) {
+        for (int i = 0; i < mod; i++) {
+            if ((number * i) % mod == 1) {
                 return i;
             }
         }
@@ -177,9 +177,9 @@ public class Polynomial extends Field {
         ArrayList<Integer> res = new ArrayList<>();
         coefficients.forEach(c -> {
             while (c < 0) {
-                c += modF;
+                c += mod;
             }
-            res.add(c % modF);
+            res.add(c % mod);
         });
         return res;
     }
@@ -222,6 +222,14 @@ public class Polynomial extends Field {
             }
         }
         return degree;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (obj instanceof Polynomial) {
+            return this.coefficients.equals(((Polynomial) obj).coefficients);
+        }
+        return super.equals(obj);
     }
 
     @Override
