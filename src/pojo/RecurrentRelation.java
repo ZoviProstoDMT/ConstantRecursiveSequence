@@ -1,15 +1,15 @@
-package pojos;
+package pojo;
 
 import java.util.List;
 
-public class RecurrentRelation {
+public class RecurrentRelation extends Field {
 
     private final int degree;
     private final List<Integer> coefficients;
 
     public RecurrentRelation(List<Integer> coefficients) {
         this.degree = coefficients.size();
-        this.coefficients = coefficients;
+        this.coefficients = normalizeCoefficients(coefficients);
     }
 
     public int getDegree() {

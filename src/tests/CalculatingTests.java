@@ -1,9 +1,9 @@
 package tests;
 
-import pojos.Field;
-import pojos.LRP;
-import pojos.Polynomial;
-import pojos.RecurrentRelation;
+import pojo.Field;
+import pojo.LRP;
+import pojo.Polynomial;
+import pojo.RecurrentRelation;
 
 import java.util.Arrays;
 import java.util.List;
@@ -25,14 +25,14 @@ public class CalculatingTests {
         boolean test1 = genSeq1.equals(seq1);
 
         Field.mod = 5;
-        LRP lrp2 = new LRP(new RecurrentRelation(Arrays.asList(1, 3, 1, 2)), Arrays.asList(3, 3, 1, 2));
+        LRP lrp2 = new LRP(new RecurrentRelation(Arrays.asList(1, 3, 8, 2)), Arrays.asList(3, 3, 1, 2));
         List<Integer> genSeq2 = lrp2.getImpulse().multiply(lrp2.getGenerator(), 20);
         List<Integer> seq2 = lrp2.getSequence(20);
         boolean test2 = genSeq2.equals(seq2);
 
         //todo понять почему число 11 не проходит тест в коеффициентах? Не обнуляется % mod
         Field.mod = 11;
-        LRP lrp3 = new LRP(new RecurrentRelation(Arrays.asList(-1, 3, -1, 2, 10, 0, 2)), Arrays.asList(3, -3, 1, 2, 3, 4, 5));
+        LRP lrp3 = new LRP(new RecurrentRelation(Arrays.asList(-1, 3, -1, 2, 12, 0, 2)), Arrays.asList(3, -3, 1, 12, 3, 4, 5));
         List<Integer> genSeq3 = lrp3.getImpulse().multiply(lrp3.getGenerator(), 20);
         List<Integer> seq3 = lrp3.getSequence(20);
         boolean test3 = genSeq3.equals(seq3);

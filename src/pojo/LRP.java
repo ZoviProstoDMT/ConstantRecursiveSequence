@@ -1,4 +1,4 @@
-package pojos;
+package pojo;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -149,18 +149,6 @@ public class LRP extends Field {
         return list;
     }
 
-    private List<Integer> normalizeCoefficients(List<Integer> coefficients) {
-        ArrayList<Integer> result = new ArrayList<>(coefficients);
-        for (int i = 0; i < result.size(); i++) {
-            while (result.get(i) < 0) {
-                int integer = result.get(i);
-                result.set(i, integer + mod);
-            }
-            result.set(i, result.get(i) % mod);
-        }
-        return result;
-    }
-
     @Override
     public int hashCode() {
         int hashCode = 0;
@@ -194,6 +182,6 @@ public class LRP extends Field {
 
     @Override
     public String toString() {
-        return getCharacteristicPolynomial().toString() + " " + getSequence(10);
+        return getSequence(getPeriod()).toString();
     }
 }
