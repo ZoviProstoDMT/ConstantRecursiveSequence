@@ -11,12 +11,14 @@ public class CalculateHelper {
     public static void main(String[] args) {
         CalculatingTests.run();
 
-        Field.mod = 17;
-        Field.generateInitialVectors(10);
+        Field.mod = 4;
 
-//        for (List<LRP> cyclicClass : cyclicClasses) {
-//            System.out.println((cyclicClasses.indexOf(cyclicClass) + 1) + " циклический класс : " + cyclicClass);
-//        }
+        LRP lrp = new LRP(new RecurrentRelation(Arrays.asList(-1, -1, -1)), Arrays.asList(0, 0, 1));
+        List<List<LRP>> cyclicClasses = lrp.getCyclicClasses();
+        for (List<LRP> cyclicClass : cyclicClasses) {
+            System.out.println((cyclicClasses.indexOf(cyclicClass) + 1) + " циклический класс : " + cyclicClass);
+        }
+        System.out.println(lrp.getCyclicType());
 
 //        Field.mod = 5;
 //        RecurrentRelation recurrentRelation = new RecurrentRelation(Arrays.asList(-1, 1, 2, -1));

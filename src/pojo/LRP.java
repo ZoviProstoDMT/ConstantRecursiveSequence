@@ -1,7 +1,9 @@
 package pojo;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class LRP extends Field {
 
@@ -140,6 +142,28 @@ public class LRP extends Field {
             }
         }
         return cyclicClasses;
+    }
+
+    public String getCyclicType() {
+        List<List<LRP>> cyclicClasses = getCyclicClasses();
+        Map<Integer, Integer> cyclicClassesCount = new HashMap<>();
+        StringBuilder cyclicType = new StringBuilder("Cyclic type = ");
+        for (List<LRP> cyclicClass : cyclicClasses) {
+            int size = cyclicClass.size();
+            if (cyclicClassesCount.containsKey(size)) {
+                cyclicClassesCount.put(size, cyclicClassesCount.get(size) + 1);
+            } else {
+                cyclicClassesCount.put(size, 1);
+            }
+        }
+        for (Map.Entry<Integer, Integer> classCount : cyclicClassesCount.entrySet()) {
+            if (classCount.getKey() == 1) {
+                cyclicType.append(String.format("%sy + ", classCount.getValue()));
+            } else {
+                cyclicType.append(String.format("%sy^%s + ", classCount.getValue(), classCount.getKey()));
+            }
+        }
+        return String.valueOf(new StringBuilder(cyclicType.reverse().substring(2)).reverse());
     }
 
     private List<Integer> getEmptyList(int size) {

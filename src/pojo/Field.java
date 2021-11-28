@@ -28,7 +28,6 @@ public class Field {
             vector = iterateVector(vector);
             if (!vectors.contains(vector)) {
                 vectors.add(new ArrayList<>(vector));
-                System.out.println(vector);
             }
         }
         return vectors;
