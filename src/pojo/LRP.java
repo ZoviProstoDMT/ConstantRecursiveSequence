@@ -123,6 +123,11 @@ public class LRP extends Field {
         return new Polynomial(coefficientsForPolynomial);
     }
 
+    public Polynomial getMinimalPolynomial() {
+        return getCharacteristicPolynomial()
+                .divide(new GreatestCommonDivisor(getGenerator(), getCharacteristicPolynomial()).getGcdResult());
+    }
+
     public List<List<LRP>> getCyclicClasses() {
         List<List<LRP>> cyclicClasses = new ArrayList<>();
         List<List<Integer>> initialVectors = generateInitialVectors(initialVector.size());

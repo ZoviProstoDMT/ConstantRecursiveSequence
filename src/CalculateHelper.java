@@ -13,13 +13,11 @@ public class CalculateHelper {
 
         Field.mod = 4;
 
-        LRP lrp = new LRP(new RecurrentRelation(Arrays.asList(-1, -1, -1)), Arrays.asList(0, 0, 1));
-        List<List<LRP>> cyclicClasses = lrp.getCyclicClasses();
-        for (List<LRP> cyclicClass : cyclicClasses) {
-            System.out.println((cyclicClasses.indexOf(cyclicClass) + 1) + " циклический класс : " + cyclicClass);
-        }
+        LRP lrp = new LRP(new RecurrentRelation(Arrays.asList(-1, -1, -1)), Arrays.asList(0, 1, 1));
+        System.out.println("LRP = " + lrp.getCharacteristicPolynomial());
         System.out.println(lrp.getCyclicType());
-
+        System.out.println();
+        System.out.println("Minimal polynomial = " + lrp.getMinimalPolynomial());
 //        Field.mod = 5;
 //        RecurrentRelation recurrentRelation = new RecurrentRelation(Arrays.asList(-1, 1, 2, -1));
 //        System.out.println("Рекуррентное соотношение: " + recurrentRelation);
