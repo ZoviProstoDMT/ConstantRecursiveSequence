@@ -1,5 +1,11 @@
-import pojos.Field;
+import pojo.Field;
+import pojo.InitialVector;
+import pojo.LRP;
+import pojo.RecurrentRelation;
 import tests.CalculatingTests;
+
+import java.util.Arrays;
+import java.util.List;
 
 public class CalculateHelper {
 
@@ -8,8 +14,8 @@ public class CalculateHelper {
 
         Field.mod = 4;
 
-//        LRP lrp = new LRP(new RecurrentRelation(Arrays.asList(-1, -1, -1)), Arrays.asList(0, 0, 1));
-//        List<List<LRP>> cyclicClasses = lrp.getCyclicClasses();
+        LRP lrp = new LRP(new RecurrentRelation(Arrays.asList(-1, -1, -1)), Arrays.asList(0, 0, 1));
+        List<List<LRP>> cyclicClasses = lrp.getCyclicClasses(InitialVector.getInitialVectors(lrp.getInitialVector().size(), Field.mod));
 //        for (List<LRP> cyclicClass : cyclicClasses) {
 //            System.out.println((cyclicClasses.indexOf(cyclicClass) + 1) + " циклический класс : " + cyclicClass);
 //        }

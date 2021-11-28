@@ -1,4 +1,4 @@
-package pojos;
+package pojo;
 
 import java.util.Collections;
 
