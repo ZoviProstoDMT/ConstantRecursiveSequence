@@ -121,8 +121,9 @@ public class LRP extends Field {
         return new Polynomial(coefficientsForPolynomial);
     }
 
-    public List<List<LRP>> getCyclicClasses(List<List<Integer>> initialVectors) {
+    public List<List<LRP>> getCyclicClasses() {
         List<List<LRP>> cyclicClasses = new ArrayList<>();
+        List<List<Integer>> initialVectors = generateInitialVectors(initialVector.size());
         for (List<Integer> initialVector : initialVectors) {
             LRP lrp = new LRP(recurrentRelation, initialVector);
             boolean notEqualsLRP = true;
@@ -194,6 +195,6 @@ public class LRP extends Field {
 
     @Override
     public String toString() {
-        return getCharacteristicPolynomial().toString() + " " + getSequence(10);
+        return getSequence(getPeriod()).toString();
     }
 }

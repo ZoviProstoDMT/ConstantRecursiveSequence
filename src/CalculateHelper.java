@@ -1,42 +1,18 @@
 import pojos.Field;
-import pojos.LRP;
-import pojos.RecurrentRelation;
 import tests.CalculatingTests;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 public class CalculateHelper {
 
     public static void main(String[] args) {
         CalculatingTests.run();
 
-        Field.mod = 2;
+        Field.mod = 4;
 
-        List<List<Integer>> initialVectors = new ArrayList<>();
-        initialVectors.add(Arrays.asList(0, 0, 0, 0));
-        initialVectors.add(Arrays.asList(0, 0, 0, 1));
-        initialVectors.add(Arrays.asList(0, 0, 1, 0));
-        initialVectors.add(Arrays.asList(0, 1, 0, 0));
-        initialVectors.add(Arrays.asList(1, 0, 0, 0));
-        initialVectors.add(Arrays.asList(0, 0, 1, 1));
-        initialVectors.add(Arrays.asList(0, 1, 1, 0));
-        initialVectors.add(Arrays.asList(1, 1, 0, 0));
-        initialVectors.add(Arrays.asList(0, 1, 0, 1));
-        initialVectors.add(Arrays.asList(1, 0, 1, 0));
-        initialVectors.add(Arrays.asList(1, 0, 0, 1));
-        initialVectors.add(Arrays.asList(0, 1, 1, 1));
-        initialVectors.add(Arrays.asList(1, 0, 1, 1));
-        initialVectors.add(Arrays.asList(1, 1, 1, 0));
-        initialVectors.add(Arrays.asList(1, 1, 0, 1));
-        initialVectors.add(Arrays.asList(1, 1, 1, 1));
-
-        LRP lrp = new LRP(new RecurrentRelation(Arrays.asList(-1, -1, -1, -1)), Arrays.asList(0, 0, 0, 1));
-        List<List<LRP>> cyclicClasses = lrp.getCyclicClasses(initialVectors);
-        for (List<LRP> cyclicClass : cyclicClasses) {
-            System.out.println((cyclicClasses.indexOf(cyclicClass) + 1) + " циклический класс : " + cyclicClass);
-        }
+//        LRP lrp = new LRP(new RecurrentRelation(Arrays.asList(-1, -1, -1)), Arrays.asList(0, 0, 1));
+//        List<List<LRP>> cyclicClasses = lrp.getCyclicClasses();
+//        for (List<LRP> cyclicClass : cyclicClasses) {
+//            System.out.println((cyclicClasses.indexOf(cyclicClass) + 1) + " циклический класс : " + cyclicClass);
+//        }
 
 //        Field.mod = 5;
 //        RecurrentRelation recurrentRelation = new RecurrentRelation(Arrays.asList(-1, 1, 2, -1));
