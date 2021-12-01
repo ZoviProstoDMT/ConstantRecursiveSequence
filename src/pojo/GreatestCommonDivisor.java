@@ -1,25 +1,11 @@
 package pojo;
 
-import java.util.Collections;
-
 public class GreatestCommonDivisor {
 
-    private final Polynomial one;
-    private final Polynomial two;
     private final Polynomial gcd;
 
     public GreatestCommonDivisor(Polynomial one, Polynomial two) {
-        this.one = one;
-        this.two = two;
         gcd = calculateGCD(one, two);
-    }
-
-    public Polynomial getOne() {
-        return one;
-    }
-
-    public Polynomial getTwo() {
-        return two;
     }
 
     public Polynomial getGcdResult() {
@@ -34,10 +20,6 @@ public class GreatestCommonDivisor {
             remainder = calculateGCD(two, remainder);
         }
         return remainder;
-    }
-
-    private Polynomial getMonomial() {
-        return new Polynomial(Collections.singletonList(1));
     }
 
     @Override

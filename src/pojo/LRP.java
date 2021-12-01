@@ -7,12 +7,17 @@ import java.util.Map;
 
 public class LRP extends Field {
 
+    private final int sequenceSize;
     private final RecurrentRelation recurrentRelation;
     private final List<Integer> initialVector;
 
     public LRP(RecurrentRelation recurrentRelation, List<Integer> initialVector) {
         this.recurrentRelation = recurrentRelation;
-        this.initialVector = normalizeCoefficients(initialVector);
+        if (recurrentRelation.getCoefficients().size() > 2 && recurrentRelation.getCoefficients().get(0) == 0) {
+            throw new RuntimeException("Polynomial F(x) is not reversible");
+        }
+        this.initialVector = normalizeCoefficients(initialVector).subList(0, recurrentRelation.getDegree());
+        sequenceSize = getSimpleSequenceSize();
     }
 
     public List<Integer> getInitialVector() {
@@ -87,7 +92,15 @@ public class LRP extends Field {
         return result;
     }
 
+    private int getSimpleSequenceSize() {
+        return getCharacteristicPolynomial().getExp();
+    }
+
     public int getPeriod() {
+        return getMinimalPolynomial().getExp();
+    }
+
+    public int getSequenceSize() {
         return getCharacteristicPolynomial().getExp();
     }
 
@@ -149,10 +162,9 @@ public class LRP extends Field {
         return cyclicClasses;
     }
 
-    public String getCyclicType() {
-        List<List<LRP>> cyclicClasses = getCyclicClasses();
+    public String getCyclicType(List<List<LRP>> cyclicClasses) {
         Map<Integer, Integer> cyclicClassesCount = new HashMap<>();
-        StringBuilder cyclicType = new StringBuilder("Cyclic type = ");
+        StringBuilder cyclicType = new StringBuilder();
         for (List<LRP> cyclicClass : cyclicClasses) {
             int size = cyclicClass.size();
             if (cyclicClassesCount.containsKey(size)) {
@@ -182,7 +194,7 @@ public class LRP extends Field {
     @Override
     public int hashCode() {
         int hashCode = 0;
-        for (Integer integer : getSequence(getPeriod())) {
+        for (Integer integer : getSequence(sequenceSize)) {
             hashCode += 31 * integer;
         }
         return hashCode;
@@ -197,11 +209,22 @@ public class LRP extends Field {
             if (!this.recurrentRelation.equals(((LRP) obj).recurrentRelation)) {
                 return false;
             }
-            int exp = this.getCharacteristicPolynomial().getExp();
+            if (initialVector.stream().noneMatch(integer -> integer != 0) &&
+                    ((LRP) obj).getInitialVector().stream().anyMatch(integer -> integer != 0)) {
+                return false;
+            }
+            if (initialVector.stream().anyMatch(integer -> integer != 0) &&
+                    ((LRP) obj).getInitialVector().stream().noneMatch(integer -> integer != 0)) {
+                return false;
+            }
+            if (this.hashCode() != obj.hashCode()) {
+                return false;
+            }
+            int period = this.getMinimalPolynomial().getExp();
             LRP temp = new LRP(this.recurrentRelation, initialVector);
-            for (int i = 0; i < exp; i++) {
+            for (int i = 0; i < period; i++) {
                 temp = temp.multiply(i, 1);
-                if (temp.getSequence(exp).equals(((LRP) obj).getSequence(exp))) {
+                if (temp.getSequence(period).equals(((LRP) obj).getSequence(period))) {
                     return true;
                 }
             }
@@ -212,6 +235,6 @@ public class LRP extends Field {
 
     @Override
     public String toString() {
-        return getSequence(getPeriod()).toString();
+        return getSequence(sequenceSize).toString();
     }
 }

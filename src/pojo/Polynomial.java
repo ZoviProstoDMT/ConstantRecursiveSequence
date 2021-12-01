@@ -15,7 +15,7 @@ public class Polynomial extends Field {
     }
 
     public Polynomial(List<Integer> coefficients) {
-        this.coefficients = convertToField(coefficients);
+        this.coefficients = trimCoefficients(convertToField(coefficients));
     }
 
     public Polynomial(List<Integer> coefficients, Polynomial remainder) {
@@ -45,7 +45,10 @@ public class Polynomial extends Field {
 
     private void reverseCoefficients(List<Integer> coefficients) {
         this.coefficients = new ArrayList<>();
-        coefficients.forEach(coefficient -> this.coefficients.add(coefficient * -1));
+        coefficients.forEach(coefficient -> {
+            int revertedCoefficient = coefficient * -1;
+            this.coefficients.add(revertedCoefficient == 0 ? 0 : revertedCoefficient + mod);
+        });
         this.coefficients.add(1);
     }
 
@@ -154,14 +157,31 @@ public class Polynomial extends Field {
     }
 
     private Polynomial trimCoefficients() {
-        for (int i = this.getDegree(); i > 0; i--) {
-            if (this.getCoefficients().get(i) == 0) {
-                this.getCoefficients().remove(i);
+        for (int i = getDegree(); i > 0; i--) {
+            if (getCoefficients().get(i) == 0) {
+                getCoefficients().remove(i);
             } else {
                 return this;
             }
         }
         return this;
+    }
+
+    private List<Integer> trimCoefficients(List<Integer> coefficients) {
+        if (coefficients.size() == 1) {
+            return coefficients;
+        }
+       if ( coefficients.stream().noneMatch(integer -> integer != 0)){
+           return getEmptyList(1);
+        }
+        for (int i = coefficients.size() - 1; i >= 0; i--) {
+            if (coefficients.get(i) == 0) {
+                coefficients.remove(i);
+            } else {
+                break;
+            }
+        }
+        return coefficients;
     }
 
     private int getReverseNumber(int number) {

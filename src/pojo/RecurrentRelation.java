@@ -1,5 +1,6 @@
 package pojo;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class RecurrentRelation extends Field {
@@ -8,8 +9,20 @@ public class RecurrentRelation extends Field {
     private final List<Integer> coefficients;
 
     public RecurrentRelation(List<Integer> coefficients) {
-        this.degree = coefficients.size();
-        this.coefficients = normalizeCoefficients(coefficients);
+        this.coefficients = trimCoefficients(normalizeCoefficients(coefficients));
+        this.degree = this.coefficients.size();
+    }
+
+    private List<Integer> trimCoefficients(List<Integer> coefficients) {
+        List<Integer> list = new ArrayList<>(coefficients);
+        for (int i = coefficients.size() - 1; i >= 0; i--) {
+            if (coefficients.get(i) == 0) {
+                list.remove(i);
+            } else {
+                break;
+            }
+        }
+        return list;
     }
 
     public int getDegree() {
@@ -32,30 +45,28 @@ public class RecurrentRelation extends Field {
     public String toString() {
         StringBuilder recurrentRelation = new StringBuilder();
         for (int i = 0; i < degree; i++) {
-            if (coefficients.get(i) != 0) {
-                if (i != degree - 1) {
-                    if (i == 0) {
-                        if (coefficients.get(i) == 1 || coefficients.get(i) == -1) {
-                            recurrentRelation.append(coefficients.get(i) == -1 ? "-C" : "C");
-                        } else {
-                            recurrentRelation.append(coefficients.get(i)).append("C");
-                        }
+            if (i != degree - 1) {
+                if (i == 0) {
+                    if (coefficients.get(i) == 1 || coefficients.get(i) == -1) {
+                        recurrentRelation.append(coefficients.get(i) == -1 ? "-C" : "C");
                     } else {
-                        if (coefficients.get(i) != 1 && coefficients.get(i) != -1) {
-                            recurrentRelation.append(coefficients.get(i)).append("C");
-                        } else {
-                            recurrentRelation.append("C");
-                        }
+                        recurrentRelation.append(coefficients.get(i)).append("C");
                     }
-                    recurrentRelation.append(i).append(coefficients.get(i + 1) >= 0 ? " + " : " - ");
                 } else {
                     if (coefficients.get(i) != 1 && coefficients.get(i) != -1) {
                         recurrentRelation.append(coefficients.get(i)).append("C");
                     } else {
                         recurrentRelation.append("C");
                     }
-                    recurrentRelation.append(i).append(" = C").append(i + 1);
                 }
+                recurrentRelation.append(i).append(coefficients.get(i + 1) >= 0 ? " + " : " - ");
+            } else {
+                if (coefficients.get(i) != 1 && coefficients.get(i) != -1) {
+                    recurrentRelation.append(coefficients.get(i)).append("C");
+                } else {
+                    recurrentRelation.append("C");
+                }
+                recurrentRelation.append(i).append(" = C").append(i + 1);
             }
         }
         return String.valueOf(recurrentRelation);

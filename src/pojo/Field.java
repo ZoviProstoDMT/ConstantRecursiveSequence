@@ -4,16 +4,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class Field {
-    public static int mod = 3;
+    public static int mod;
 
     public static List<Integer> normalizeCoefficients(List<Integer> coefficients) {
-        ArrayList<Integer> result = new ArrayList<>(coefficients);
-        for (int i = 0; i < result.size(); i++) {
-            while (result.get(i) < 0) {
-                int integer = result.get(i);
-                result.set(i, integer + mod);
+        ArrayList<Integer> result = new ArrayList<>();
+        for (int i = 0; i < coefficients.size(); i++) {
+            int member = coefficients.get(i) % mod;
+            if (coefficients.get(i) < 0) {
+                result.add(i, member + mod);
+            } else {
+                result.add(i, member);
             }
-            result.set(i, result.get(i) % mod);
         }
         return result;
     }
@@ -53,4 +54,40 @@ public class Field {
         return vector;
     }
 
+    public static boolean isModPrime() {
+        double halfRange = Math.sqrt(mod);
+        for (int i = 2; i <= halfRange; i++) {
+            if (mod % i == 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private List<Polynomial> getAllDecomposablePolynomials(int degree) {
+        List<Polynomial> decomposablePolynomials = new ArrayList<>();
+        List<Polynomial> allPolynomials = new ArrayList<>();
+        List<List<Integer>> initialVectors = generateInitialVectors(degree);
+        for (List<Integer> initialVector : initialVectors) {
+            allPolynomials.add(new Polynomial(initialVector));
+        }
+        for (List<Integer> initialVector1 : initialVectors) {
+            Polynomial p1 = new Polynomial(initialVector1);
+            if (p1.getDegree() == 0) {
+                continue;
+            }
+            for (List<Integer> initialVector2 : initialVectors) {
+                Polynomial p2 = new Polynomial(initialVector2);
+                if (p2.getDegree() == 0) {
+                    continue;
+                }
+                Polynomial multiplyResult = p1.multiply(p2);
+                if (multiplyResult.getDegree() == degree) {
+                    decomposablePolynomials.add(multiplyResult);
+                }
+            }
+        }
+        allPolynomials.removeAll(decomposablePolynomials);
+        return allPolynomials;
+    }
 }
