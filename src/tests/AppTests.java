@@ -20,6 +20,8 @@ public class AppTests {
         calculateExponentTest();
         generateInitialVectorsTest();
         calculateGSDTest();
+        polynomialCyclicTypeCalculatingTest();
+        polynomialEqualsTest();
         System.out.println();
     }
 
@@ -164,6 +166,10 @@ public class AppTests {
         test &= new GreatestCommonDivisor(new Polynomial(Arrays.asList(1, 0, 0, 1, 0)),
                 new Polynomial(Arrays.asList(1, 0, 1))).getGcdResult().toString().equals("X + 1");
 
+        Field.mod = 5;
+        test &= new GreatestCommonDivisor(new Polynomial(Arrays.asList(2, 2, 2, 3, 1)),
+                new Polynomial(Arrays.asList(0, 0, 0, 4, 2, 1))).getGcdResult().toString().equals("1");
+
         Instant finish = Instant.now();
         long testingTimeMillis = Duration.between(start, finish).toMillis();
         String testingTime = testingTimeMillis / 1000 + "s " + testingTimeMillis % 1000 + "ms";
@@ -172,6 +178,51 @@ public class AppTests {
             System.out.println("- TEST Вычисление НОД - PASSED (" + testingTime + ")");
         } else {
             System.err.println("- TEST Вычисление НОД - FAILED (" + testingTime + ")");
+        }
+    }
+
+    public static void polynomialEqualsTest() {
+        Instant start = Instant.now();
+        boolean test;
+
+        Field.mod = 3;
+        LRP lrp1 = new LRP(new RecurrentRelation(Arrays.asList(1, 1, 1)), Arrays.asList(0, 0, 1));
+        LRP lrp2 = new LRP(new RecurrentRelation(Arrays.asList(1, 1, 1)), Arrays.asList(0, 2, 0));
+        LRP lrp3 = new LRP(new RecurrentRelation(Arrays.asList(1, 1, 1)), Arrays.asList(0, 0, 2));
+        test = lrp1.equals(lrp2) && lrp2.equals(lrp1) && !lrp1.equals(lrp3) && !lrp2.equals(lrp3);
+
+        LRP lrp4 = new LRP(new RecurrentRelation(Arrays.asList(2, 0, 1, 1)), Arrays.asList(0, 0, 0, 1));
+        LRP lrp5 = new LRP(new RecurrentRelation(Arrays.asList(2, 0, 1, 1)), Arrays.asList(0, 2, 2, 0));
+        LRP lrp6 = new LRP(new RecurrentRelation(Arrays.asList(2, 0, 1, 1)), Arrays.asList(1, 1, 0, 2));
+        test &= lrp4.equals(lrp5) && lrp5.equals(lrp4) && !lrp4.equals(lrp6) && !lrp5.equals(lrp6);
+
+        Instant finish = Instant.now();
+        long testingTimeMillis = Duration.between(start, finish).toMillis();
+        String testingTime = testingTimeMillis / 1000 + "s " + testingTimeMillis % 1000 + "ms";
+
+        if (test) {
+            System.out.println("- TEST Эквивалентность многочленов - PASSED (" + testingTime + ")");
+        } else {
+            System.err.println("- TEST Эквивалентность многочленов - FAILED (" + testingTime + ")");
+        }
+    }
+
+    public static void polynomialCyclicTypeCalculatingTest() {
+        Instant start = Instant.now();
+        boolean test;
+
+        Field.mod = 2;
+        LRP lrp = new LRP(new RecurrentRelation(Arrays.asList(1, 1)), Arrays.asList(0, 1));
+        test = lrp.getCyclicType(lrp.getCyclicClasses()).equals("1y + 1y^3");
+
+        Instant finish = Instant.now();
+        long testingTimeMillis = Duration.between(start, finish).toMillis();
+        String testingTime = testingTimeMillis / 1000 + "s " + testingTimeMillis % 1000 + "ms";
+
+        if (test) {
+            System.out.println("- TEST Циклический тип - PASSED (" + testingTime + ")");
+        } else {
+            System.err.println("- TEST Циклический тип - FAILED (" + testingTime + ")");
         }
     }
 }

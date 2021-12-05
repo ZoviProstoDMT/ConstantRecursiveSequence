@@ -64,13 +64,19 @@ public class Field {
         return true;
     }
 
-    private List<Polynomial> getAllDecomposablePolynomials(int degree) {
-        List<Polynomial> decomposablePolynomials = new ArrayList<>();
-        List<Polynomial> allPolynomials = new ArrayList<>();
-        List<List<Integer>> initialVectors = generateInitialVectors(degree);
-        for (List<Integer> initialVector : initialVectors) {
-            allPolynomials.add(new Polynomial(initialVector));
+    private boolean isPrime(int a) {
+        double halfRange = Math.sqrt(a);
+        for (int i = 2; i <= halfRange; i++) {
+            if (a % i == 0) {
+                return false;
+            }
         }
+        return true;
+    }
+
+    public static List<Polynomial> getAllDecomposablePolynomials(int degree) {
+        List<Polynomial> decomposablePolynomials = new ArrayList<>();
+        List<List<Integer>> initialVectors = generateInitialVectors(degree);
         for (List<Integer> initialVector1 : initialVectors) {
             Polynomial p1 = new Polynomial(initialVector1);
             if (p1.getDegree() == 0) {
@@ -82,12 +88,26 @@ public class Field {
                     continue;
                 }
                 Polynomial multiplyResult = p1.multiply(p2);
-                if (multiplyResult.getDegree() == degree) {
+                if (multiplyResult.getDegree() == degree && !decomposablePolynomials.contains(multiplyResult)) {
                     decomposablePolynomials.add(multiplyResult);
                 }
             }
         }
-        allPolynomials.removeAll(decomposablePolynomials);
-        return allPolynomials;
+        return decomposablePolynomials;
+    }
+
+    public static List<Integer> getPrimeMembers() {
+        List<Integer> members = new ArrayList<>();
+        int initialInt = mod;
+        for (int i = 2; i < mod; i++) {
+            while (initialInt % i == 0) {
+                members.add(i);
+                initialInt = initialInt / i;
+            }
+            if (initialInt == 1) {
+                break;
+            }
+        }
+        return members;
     }
 }

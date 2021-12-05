@@ -1,14 +1,12 @@
 package pojo;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 public class Polynomial extends Field {
 
     private List<Integer> coefficients;
     private Polynomial remainder;
+    private boolean isDecomposable = true;
 
     public Polynomial(RecurrentRelation recurrentRelation) {
         reverseCoefficients(recurrentRelation.getCoefficients());
@@ -21,6 +19,10 @@ public class Polynomial extends Field {
     public Polynomial(List<Integer> coefficients, Polynomial remainder) {
         this.coefficients = convertToField(coefficients);
         this.remainder = remainder;
+    }
+
+    public boolean isDecomposable() {
+        return isDecomposable;
     }
 
     public List<Integer> getCoefficients() {
@@ -219,6 +221,37 @@ public class Polynomial extends Field {
         Polynomial temp = new Polynomial(Collections.singletonList(0));
         temp.setRemainder(new Polynomial(Collections.singletonList(0)));
         return temp;
+    }
+
+    public boolean isReversible() {
+        return getCoefficients().get(0) != 0;
+    }
+
+    public Map<Polynomial, Integer> decompose(Polynomial minimalPolynomial) {
+        Map<Polynomial, Integer> decomposeOfCharacteristicPolynomial = new HashMap<>();
+        if (minimalPolynomial.getDegree() != getDegree() || minimalPolynomial.getCoefficients().size() == 1) {
+            Polynomial temp = this;
+            while (true) {
+                Polynomial divideRes = temp.divide(minimalPolynomial);
+                if (divideRes.getRemainder().equals(new Polynomial(Collections.singletonList(0)))) {
+                    if (!decomposeOfCharacteristicPolynomial.containsKey(minimalPolynomial)) {
+                        decomposeOfCharacteristicPolynomial.put(minimalPolynomial, 1);
+                    } else {
+                        decomposeOfCharacteristicPolynomial.put(minimalPolynomial,
+                                decomposeOfCharacteristicPolynomial.get(minimalPolynomial) + 1);
+                    }
+                    temp = divideRes;
+                    isDecomposable = true;
+                } else {
+                    decomposeOfCharacteristicPolynomial.put(temp, 1);
+                    break;
+                }
+            }
+        } else {
+            decomposeOfCharacteristicPolynomial.put(this, 1);
+            isDecomposable = false;
+        }
+        return decomposeOfCharacteristicPolynomial;
     }
 
     public int getExp() {

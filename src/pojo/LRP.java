@@ -7,17 +7,17 @@ import java.util.Map;
 
 public class LRP extends Field {
 
-    private final int sequenceSize;
     private final RecurrentRelation recurrentRelation;
     private final List<Integer> initialVector;
+    private final Polynomial characteristicPolynomial;
+    private Polynomial minimalPolynomial;
+    private Polynomial generatorPolynomial;
+    private int period = 0;
 
     public LRP(RecurrentRelation recurrentRelation, List<Integer> initialVector) {
         this.recurrentRelation = recurrentRelation;
-        if (recurrentRelation.getCoefficients().size() > 2 && recurrentRelation.getCoefficients().get(0) == 0) {
-            throw new RuntimeException("Polynomial F(x) is not reversible");
-        }
         this.initialVector = normalizeCoefficients(initialVector).subList(0, recurrentRelation.getDegree());
-        sequenceSize = getSimpleSequenceSize();
+        characteristicPolynomial = new Polynomial(recurrentRelation);
     }
 
     public List<Integer> getInitialVector() {
@@ -29,7 +29,7 @@ public class LRP extends Field {
     }
 
     public Polynomial getCharacteristicPolynomial() {
-        return new Polynomial(recurrentRelation);
+        return characteristicPolynomial;
     }
 
     public LRP getImpulse() {
@@ -92,16 +92,15 @@ public class LRP extends Field {
         return result;
     }
 
-    private int getSimpleSequenceSize() {
-        return getCharacteristicPolynomial().getExp();
-    }
-
     public int getPeriod() {
-        return getMinimalPolynomial().getExp();
-    }
-
-    public int getSequenceSize() {
-        return getCharacteristicPolynomial().getExp();
+        if (period == 0) {
+            if (getCharacteristicPolynomial().isDecomposable()) {
+                period = getMinimalPolynomial().getExp();
+            } else {
+                period = (int) (Math.pow(Field.mod, getCharacteristicPolynomial().getDegree()) - 1);
+            }
+        }
+        return period;
     }
 
     private List<Integer> sum(List<Integer> one, List<Integer> two) {
@@ -133,12 +132,18 @@ public class LRP extends Field {
             }
             coefficientsForPolynomial.set(degree - i - 1, result);
         }
-        return new Polynomial(coefficientsForPolynomial);
+        if (generatorPolynomial == null) {
+            generatorPolynomial = new Polynomial(coefficientsForPolynomial);
+        }
+        return generatorPolynomial;
     }
 
     public Polynomial getMinimalPolynomial() {
-        return getCharacteristicPolynomial()
-                .divide(new GreatestCommonDivisor(getGenerator(), getCharacteristicPolynomial()).getGcdResult());
+        if (minimalPolynomial == null) {
+            minimalPolynomial = getCharacteristicPolynomial()
+                    .divide(new GreatestCommonDivisor(getGenerator(), getCharacteristicPolynomial()).getGcdResult());
+        }
+        return minimalPolynomial;
     }
 
     public List<List<LRP>> getCyclicClasses() {
@@ -180,7 +185,7 @@ public class LRP extends Field {
                 cyclicType.append(String.format("%sy^%s + ", classCount.getValue(), classCount.getKey()));
             }
         }
-        return String.valueOf(new StringBuilder(cyclicType.reverse().substring(2)).reverse());
+        return String.valueOf(new StringBuilder(cyclicType.reverse().substring(3)).reverse());
     }
 
     private List<Integer> getEmptyList(int size) {
@@ -194,7 +199,7 @@ public class LRP extends Field {
     @Override
     public int hashCode() {
         int hashCode = 0;
-        for (Integer integer : getSequence(sequenceSize)) {
+        for (Integer integer : getSequence(getCharacteristicPolynomial().getExp())) {
             hashCode += 31 * integer;
         }
         return hashCode;
@@ -220,10 +225,10 @@ public class LRP extends Field {
             if (this.hashCode() != obj.hashCode()) {
                 return false;
             }
-            int period = this.getMinimalPolynomial().getExp();
+            int period = getPeriod();
             LRP temp = new LRP(this.recurrentRelation, initialVector);
-            for (int i = 0; i < period; i++) {
-                temp = temp.multiply(i, 1);
+            for (int i = 1; i < period; i++) {
+                temp = temp.multiply(1, 1);
                 if (temp.getSequence(period).equals(((LRP) obj).getSequence(period))) {
                     return true;
                 }
@@ -235,6 +240,6 @@ public class LRP extends Field {
 
     @Override
     public String toString() {
-        return getSequence(sequenceSize).toString();
+        return getSequence(20).toString();
     }
 }
