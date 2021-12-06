@@ -4,33 +4,40 @@ import java.util.Collections;
 
 public class GreatestCommonDivisor {
 
-    private final Polynomial gcd;
-
-    public GreatestCommonDivisor(Polynomial one, Polynomial two) {
-        gcd = calculateGCD(one, two);
-    }
-
-    public Polynomial getGcdResult() {
-        return gcd;
-    }
-
-    private Polynomial calculateGCD(Polynomial one, Polynomial two) {
-        if (one.getDegree() < two.getDegree()) {
-            Polynomial temp = one;
-            one = two;
-            two = temp;
+    public static Polynomial get(Polynomial a, Polynomial b) {
+        if (a.getDegree() < b.getDegree()) {
+            Polynomial temp = a;
+            a = b;
+            b = temp;
         }
-        Polynomial remainder = one.divide(two).getRemainder();
+        Polynomial remainder = a.divide(b).getRemainder();
         if (remainder.getDegree() == 0 && remainder.getCoefficients().get(0) == 0) {
-            return two;
+            return b;
         } else {
-            remainder = calculateGCD(two, remainder);
+            remainder = get(b, remainder);
         }
         return remainder.getDegree() == 0 ? new Polynomial(Collections.singletonList(1)) : remainder;
     }
 
-    @Override
-    public String toString() {
-        return String.valueOf(gcd);
+    public static int get(int a, int b) {
+        a = Math.abs(a);
+        b = Math.abs(b);
+        if (a == 0) return b;
+        if (b == 0) return a;
+        int factorsOfTwoInA = Integer.numberOfTrailingZeros(a),
+                factorsOfTwoInB = Integer.numberOfTrailingZeros(b),
+                commonFactorsOfTwo = Math.min(factorsOfTwoInA, factorsOfTwoInB);
+        a >>= factorsOfTwoInA;
+        b >>= factorsOfTwoInB;
+        while (a != b) {
+            if (a > b) {
+                a = (a - b);
+                a >>= Integer.numberOfTrailingZeros(a);
+            } else {
+                b = (b - a);
+                b >>= Integer.numberOfTrailingZeros(b);
+            }
+        }
+        return a << commonFactorsOfTwo;
     }
 }

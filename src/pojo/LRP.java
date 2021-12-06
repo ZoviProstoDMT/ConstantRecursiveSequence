@@ -10,6 +10,7 @@ public class LRP extends Field {
     private final RecurrentRelation recurrentRelation;
     private final List<Integer> initialVector;
     private final Polynomial characteristicPolynomial;
+    private Map<Polynomial, Integer> decompositionOfCharacteristicPolynomial;
     private Polynomial minimalPolynomial;
     private Polynomial generatorPolynomial;
     private int period = 0;
@@ -26,6 +27,10 @@ public class LRP extends Field {
 
     public List<Integer> getSequence(int numberOfMembers) {
         return calculateSequence(numberOfMembers);
+    }
+
+    public List<Integer> getSequence() {
+        return calculateSequence(getPeriod());
     }
 
     public Polynomial getCharacteristicPolynomial() {
@@ -92,12 +97,44 @@ public class LRP extends Field {
         return result;
     }
 
+    public List<Integer> multiply(Polynomial polynomial) {
+        List<Integer> result = getEmptyList(getPeriod());
+        for (int i = 0; i < polynomial.getCoefficients().size(); i++) {
+            LRP lrp = this.multiply(i, polynomial.getCoefficients().get(i));
+            result = sum(result, lrp.getSequence(getPeriod()));
+        }
+        return result;
+    }
+
+    public Map<Polynomial, Integer> getDecompositionOfCharacteristicPolynomial() {
+        if (decompositionOfCharacteristicPolynomial == null) {
+            decompositionOfCharacteristicPolynomial = getCharacteristicPolynomial().decompose(getMinimalPolynomial());
+        }
+        return decompositionOfCharacteristicPolynomial;
+    }
+
     public int getPeriod() {
         if (period == 0) {
-            if (getCharacteristicPolynomial().isDecomposable()) {
-                period = getMinimalPolynomial().getExp();
+            if (!Field.isModPrime()) {
+                System.out.print("Z[x] не является простым. Рассмотрим композицию: ");
+                List<Integer> primeMembers = Field.getPrimeMembers();
+                System.out.println("Z" + Field.mod + " = " +
+                        primeMembers.toString().replace("[", "Z").replace("]", "")
+                                .replace(" ", "Z").replace(",", " + "));
+                System.out.println();
+                List<Integer> compositionOfPeriods = new ArrayList<>();
+                for (int i = 0; i < primeMembers.size(); i++) {
+                    Field.mod = primeMembers.get(i);
+                    LRP newLrp = new LRP(new RecurrentRelation(recurrentRelation.getCoefficients()), getInitialVector());
+                    System.out.println("F" + i + "(x) = " + newLrp.getCharacteristicPolynomial() + " (mod " + Field.mod + ")");
+                    System.out.println("T" + i + "(x) = " + newLrp.getPeriod());
+                    System.out.println();
+                    compositionOfPeriods.add(newLrp.getPeriod());
+                }
+                System.out.println("Значит пероид будет равен = " + compositionOfPeriods);
+                period = LeastCommonMultiple.get(compositionOfPeriods.get(0), compositionOfPeriods.get(1));
             } else {
-                period = (int) (Math.pow(Field.mod, getCharacteristicPolynomial().getDegree()) - 1);
+                period = getMinimalPolynomial().getExp();
             }
         }
         return period;
@@ -112,27 +149,27 @@ public class LRP extends Field {
     }
 
     public Polynomial getGenerator() {
-        int degree = recurrentRelation.getDegree();
-        List<Integer> coefficientsForPolynomial = getEmptyList(degree);
-        List<Integer> f = recurrentRelation.getCoefficients();
-        coefficientsForPolynomial.set(degree - 1, initialVector.get(0));
-        for (int i = 1; i <= degree - 1; i++) {
-            int result = initialVector.get(i);
-            boolean nextStep = false;
-            for (int j = degree - 1; !nextStep; ) {
-                for (int ii = i - 1; ii >= 0; ii--) {
-                    result -= f.get(j) * initialVector.get(ii);
-                    result %= mod;
-                    j--;
-                    if (ii == 0) {
-                        nextStep = true;
-                        break;
+        if (generatorPolynomial == null) {
+            int degree = recurrentRelation.getDegree();
+            List<Integer> coefficientsForPolynomial = getEmptyList(degree);
+            List<Integer> f = recurrentRelation.getCoefficients();
+            coefficientsForPolynomial.set(degree - 1, initialVector.get(0));
+            for (int i = 1; i <= degree - 1; i++) {
+                int result = initialVector.get(i);
+                boolean nextStep = false;
+                for (int j = degree - 1; !nextStep; ) {
+                    for (int ii = i - 1; ii >= 0; ii--) {
+                        result -= f.get(j) * initialVector.get(ii);
+                        result %= mod;
+                        j--;
+                        if (ii == 0) {
+                            nextStep = true;
+                            break;
+                        }
                     }
                 }
+                coefficientsForPolynomial.set(degree - i - 1, result);
             }
-            coefficientsForPolynomial.set(degree - i - 1, result);
-        }
-        if (generatorPolynomial == null) {
             generatorPolynomial = new Polynomial(coefficientsForPolynomial);
         }
         return generatorPolynomial;
@@ -141,7 +178,7 @@ public class LRP extends Field {
     public Polynomial getMinimalPolynomial() {
         if (minimalPolynomial == null) {
             minimalPolynomial = getCharacteristicPolynomial()
-                    .divide(new GreatestCommonDivisor(getGenerator(), getCharacteristicPolynomial()).getGcdResult());
+                    .divide(GreatestCommonDivisor.get(getGenerator(), getCharacteristicPolynomial()));
         }
         return minimalPolynomial;
     }
@@ -240,6 +277,6 @@ public class LRP extends Field {
 
     @Override
     public String toString() {
-        return getSequence(20).toString();
+        return getSequence(15).toString();
     }
 }

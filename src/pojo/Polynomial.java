@@ -6,7 +6,6 @@ public class Polynomial extends Field {
 
     private List<Integer> coefficients;
     private Polynomial remainder;
-    private boolean isDecomposable = true;
 
     public Polynomial(RecurrentRelation recurrentRelation) {
         reverseCoefficients(recurrentRelation.getCoefficients());
@@ -19,10 +18,6 @@ public class Polynomial extends Field {
     public Polynomial(List<Integer> coefficients, Polynomial remainder) {
         this.coefficients = convertToField(coefficients);
         this.remainder = remainder;
-    }
-
-    public boolean isDecomposable() {
-        return isDecomposable;
     }
 
     public List<Integer> getCoefficients() {
@@ -75,6 +70,14 @@ public class Polynomial extends Field {
         }
         if (polynomial.getHighestCoefficient() > 1 || polynomial.getHighestCoefficient() < -1) {
             polynomial = polynomial.normalize();
+        }
+        //todo добавить деление на моном
+        if (polynomial.getDegree() == 1 && polynomial.getCoefficients().equals(Arrays.asList(0, 1))) {
+            List<Integer> tempCoefficients = new ArrayList<>(this.getCoefficients());
+            tempCoefficients.remove(0);
+            Polynomial result = new Polynomial(tempCoefficients);
+            result.setRemainder(new Polynomial(Collections.singletonList(0)));
+            return result;
         }
         int tempDegree = this.trimCoefficients().getDegree() - polynomial.trimCoefficients().getDegree();
         int tempCoefficient = (this.getHighestCoefficient() * getReverseNumber(polynomial.getHighestCoefficient()) % mod);
@@ -228,30 +231,28 @@ public class Polynomial extends Field {
     }
 
     public Map<Polynomial, Integer> decompose(Polynomial minimalPolynomial) {
-        Map<Polynomial, Integer> decomposeOfCharacteristicPolynomial = new HashMap<>();
+        Map<Polynomial, Integer> decompositionOfCharacteristicPolynomial = new HashMap<>();
         if (minimalPolynomial.getDegree() != getDegree() || minimalPolynomial.getCoefficients().size() == 1) {
             Polynomial temp = this;
             while (true) {
                 Polynomial divideRes = temp.divide(minimalPolynomial);
                 if (divideRes.getRemainder().equals(new Polynomial(Collections.singletonList(0)))) {
-                    if (!decomposeOfCharacteristicPolynomial.containsKey(minimalPolynomial)) {
-                        decomposeOfCharacteristicPolynomial.put(minimalPolynomial, 1);
+                    if (!decompositionOfCharacteristicPolynomial.containsKey(minimalPolynomial)) {
+                        decompositionOfCharacteristicPolynomial.put(minimalPolynomial, 1);
                     } else {
-                        decomposeOfCharacteristicPolynomial.put(minimalPolynomial,
-                                decomposeOfCharacteristicPolynomial.get(minimalPolynomial) + 1);
+                        decompositionOfCharacteristicPolynomial.put(minimalPolynomial,
+                                decompositionOfCharacteristicPolynomial.get(minimalPolynomial) + 1);
                     }
                     temp = divideRes;
-                    isDecomposable = true;
                 } else {
-                    decomposeOfCharacteristicPolynomial.put(temp, 1);
+                    decompositionOfCharacteristicPolynomial.put(temp, 1);
                     break;
                 }
             }
         } else {
-            decomposeOfCharacteristicPolynomial.put(this, 1);
-            isDecomposable = false;
+            decompositionOfCharacteristicPolynomial.put(this, 1);
         }
-        return decomposeOfCharacteristicPolynomial;
+        return decompositionOfCharacteristicPolynomial;
     }
 
     public int getExp() {

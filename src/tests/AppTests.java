@@ -25,6 +25,42 @@ public class AppTests {
         System.out.println();
     }
 
+    public static void generateToStringValuesTest() {
+        Instant start = Instant.now();
+        boolean test;
+
+        Field.mod = 3;
+        RecurrentRelation r1 = new RecurrentRelation(Arrays.asList(0, 2, 0, 2, 0, 0));
+        Polynomial p11 = new LRP(r1, Arrays.asList(1, 1, 1, 1, 1, 1)).getCharacteristicPolynomial();
+        Polynomial p1 = new Polynomial(r1);
+        test = r1.toString().equals("0C0 + 2C1 + 0C2 + 2C3 + 0C4 + 0C5 = C6") &&
+                p11.toString().equals("X^6 + X^3 + X") && p1.toString().equals("X^6 + X^3 + X");
+
+        Field.mod = 7;
+        RecurrentRelation r2 = new RecurrentRelation(Arrays.asList(6, 6, 0, 7));
+        Polynomial p22 = new LRP(r2, Arrays.asList(0, 0, 7, 1)).getCharacteristicPolynomial();
+        Polynomial p2 = new Polynomial(r2);
+        test &= r2.toString().equals("6C0 + 6C1 + 0C2 + 0C3 = C4") &&
+                p22.toString().equals("X^4 + X + 1") && p2.toString().equals("X^4 + X + 1");
+
+        Field.mod = 4;
+        RecurrentRelation r3 = new RecurrentRelation(Arrays.asList(3, 0, 4, 4, 3));
+        Polynomial p33 = new LRP(r3, Arrays.asList(0, 0, 0, 4, 1)).getCharacteristicPolynomial();
+        Polynomial p3 = new Polynomial(r3);
+        test &= r3.toString().equals("3C0 + 0C1 + 0C2 + 0C3 + 3C4 = C5") &&
+                p33.toString().equals("X^5 + X^4 + 1") && p3.toString().equals("X^5 + X^4 + 1");
+
+        Instant finish = Instant.now();
+        long testingTimeMillis = Duration.between(start, finish).toMillis();
+        String testingTime = testingTimeMillis / 1000 + "s " + testingTimeMillis % 1000 + "ms";
+
+        if (test) {
+            System.out.println("- TEST Создание текста для соотношений и многочленов - PASSED (" + testingTime + ")");
+        } else {
+            System.err.println("- TEST Создание текста для соотношений и многочленов - FAILED (" + testingTime + ")");
+        }
+    }
+
     public static void calculateGeneratorTest() {
         Instant start = Instant.now();
         boolean test;
@@ -119,56 +155,24 @@ public class AppTests {
         }
     }
 
-    public static void generateToStringValuesTest() {
-        Instant start = Instant.now();
-        boolean test;
-
-        Field.mod = 3;
-        RecurrentRelation r1 = new RecurrentRelation(Arrays.asList(2, 0, 1));
-        Polynomial p1 = new Polynomial(r1);
-        test = r1.toString().equals("2C0 + 0C1 + C2 = C3") && p1.toString().equals("X^3 + 2X^2 + 1");
-
-        Field.mod = 7;
-        RecurrentRelation r2 = new RecurrentRelation(Arrays.asList(0, 0, 0, 0, 6, 0, 7));
-        Polynomial p2 = new Polynomial(r2);
-        test &= r2.toString().equals("0C0 + 0C1 + 0C2 + 0C3 + 6C4 = C5") && p2.toString().equals("X^5 + X^4");
-
-        Field.mod = 4;
-        RecurrentRelation r3 = new RecurrentRelation(Arrays.asList(0, -5));
-        Polynomial p3 = new Polynomial(r3);
-        test &= r3.toString().equals("0C0 + 3C1 = C2") && p3.toString().equals("X^2 + X");
-
-        test &= new Polynomial(Arrays.asList(0, 0, 1, 0)).toString().equals("X^2");
-
-        Instant finish = Instant.now();
-        long testingTimeMillis = Duration.between(start, finish).toMillis();
-        String testingTime = testingTimeMillis / 1000 + "s " + testingTimeMillis % 1000 + "ms";
-
-        if (test) {
-            System.out.println("- TEST Создание текста для соотношений и многочленов - PASSED (" + testingTime + ")");
-        } else {
-            System.err.println("- TEST Создание текста для соотношений и многочленов - FAILED (" + testingTime + ")");
-        }
-    }
-
     public static void calculateGSDTest() {
         Instant start = Instant.now();
         boolean test;
 
         Field.mod = 3;
-        test = new GreatestCommonDivisor(new Polynomial(Arrays.asList(0, 0, 1)),
-                new Polynomial(Arrays.asList(0, 1))).getGcdResult().toString().equals("X");
+        test = GreatestCommonDivisor.get(new Polynomial(Arrays.asList(0, 0, 1)),
+                new Polynomial(Arrays.asList(0, 1))).toString().equals("X");
 
         Field.mod = 2;
-        test &= new GreatestCommonDivisor(new Polynomial(Arrays.asList(1, 0, 1)),
-                new Polynomial(Arrays.asList(1, 1))).getGcdResult().toString().equals("X + 1");
+        test &= GreatestCommonDivisor.get(new Polynomial(Arrays.asList(1, 0, 1)),
+                new Polynomial(Arrays.asList(1, 1))).toString().equals("X + 1");
 
-        test &= new GreatestCommonDivisor(new Polynomial(Arrays.asList(1, 0, 0, 1, 0)),
-                new Polynomial(Arrays.asList(1, 0, 1))).getGcdResult().toString().equals("X + 1");
+        test &= GreatestCommonDivisor.get(new Polynomial(Arrays.asList(1, 0, 0, 1, 0)),
+                new Polynomial(Arrays.asList(1, 0, 1))).toString().equals("X + 1");
 
         Field.mod = 5;
-        test &= new GreatestCommonDivisor(new Polynomial(Arrays.asList(2, 2, 2, 3, 1)),
-                new Polynomial(Arrays.asList(0, 0, 0, 4, 2, 1))).getGcdResult().toString().equals("1");
+        test &= GreatestCommonDivisor.get(new Polynomial(Arrays.asList(2, 2, 2, 3, 1)),
+                new Polynomial(Arrays.asList(0, 0, 0, 4, 2, 1))).toString().equals("1");
 
         Instant finish = Instant.now();
         long testingTimeMillis = Duration.between(start, finish).toMillis();
@@ -178,6 +182,25 @@ public class AppTests {
             System.out.println("- TEST Вычисление НОД - PASSED (" + testingTime + ")");
         } else {
             System.err.println("- TEST Вычисление НОД - FAILED (" + testingTime + ")");
+        }
+    }
+
+    public static void polynomialCyclicTypeCalculatingTest() {
+        Instant start = Instant.now();
+        boolean test;
+
+        Field.mod = 2;
+        LRP lrp = new LRP(new RecurrentRelation(Arrays.asList(1, 1)), Arrays.asList(0, 1));
+        test = lrp.getCyclicType(lrp.getCyclicClasses()).equals("1y + 1y^3");
+
+        Instant finish = Instant.now();
+        long testingTimeMillis = Duration.between(start, finish).toMillis();
+        String testingTime = testingTimeMillis / 1000 + "s " + testingTimeMillis % 1000 + "ms";
+
+        if (test) {
+            System.out.println("- TEST Циклический тип - PASSED (" + testingTime + ")");
+        } else {
+            System.err.println("- TEST Циклический тип - FAILED (" + testingTime + ")");
         }
     }
 
@@ -204,25 +227,6 @@ public class AppTests {
             System.out.println("- TEST Эквивалентность многочленов - PASSED (" + testingTime + ")");
         } else {
             System.err.println("- TEST Эквивалентность многочленов - FAILED (" + testingTime + ")");
-        }
-    }
-
-    public static void polynomialCyclicTypeCalculatingTest() {
-        Instant start = Instant.now();
-        boolean test;
-
-        Field.mod = 2;
-        LRP lrp = new LRP(new RecurrentRelation(Arrays.asList(1, 1)), Arrays.asList(0, 1));
-        test = lrp.getCyclicType(lrp.getCyclicClasses()).equals("1y + 1y^3");
-
-        Instant finish = Instant.now();
-        long testingTimeMillis = Duration.between(start, finish).toMillis();
-        String testingTime = testingTimeMillis / 1000 + "s " + testingTimeMillis % 1000 + "ms";
-
-        if (test) {
-            System.out.println("- TEST Циклический тип - PASSED (" + testingTime + ")");
-        } else {
-            System.err.println("- TEST Циклический тип - FAILED (" + testingTime + ")");
         }
     }
 }

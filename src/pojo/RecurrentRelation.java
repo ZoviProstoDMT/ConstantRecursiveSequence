@@ -9,7 +9,7 @@ public class RecurrentRelation extends Field {
     private final List<Integer> coefficients;
 
     public RecurrentRelation(List<Integer> coefficients) {
-        this.coefficients = trimCoefficients(normalizeCoefficients(coefficients));
+        this.coefficients = normalizeCoefficients(coefficients);
         this.degree = this.coefficients.size();
     }
 
