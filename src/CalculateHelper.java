@@ -12,9 +12,9 @@ public class CalculateHelper {
     }
 
     private static void showSimpleDemo() {
-        Field.mod = 6;
-        RecurrentRelation recurrentRelation = new RecurrentRelation(Arrays.asList(1, 3, 14));
-        LRP lrp = new LRP(recurrentRelation, Arrays.asList(1, 0, 1));
+        Field.mod = 3;
+        RecurrentRelation recurrentRelation = new RecurrentRelation(Arrays.asList(1, 0, 1));
+        LRP lrp = new LRP(recurrentRelation, Arrays.asList(1, 1, 1));
         showInformationAbout(lrp);
     }
 

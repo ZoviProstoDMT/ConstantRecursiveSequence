@@ -64,16 +64,6 @@ public class Field {
         return true;
     }
 
-    private boolean isPrime(int a) {
-        double halfRange = Math.sqrt(a);
-        for (int i = 2; i <= halfRange; i++) {
-            if (a % i == 0) {
-                return false;
-            }
-        }
-        return true;
-    }
-
     public static List<Polynomial> getAllDecomposablePolynomials(int degree) {
         List<Polynomial> decomposablePolynomials = new ArrayList<>();
         List<List<Integer>> initialVectors = generateInitialVectors(degree);

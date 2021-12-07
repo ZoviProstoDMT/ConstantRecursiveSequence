@@ -5,6 +5,7 @@ import pojo.*;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 public class AppTests {
@@ -20,7 +21,7 @@ public class AppTests {
         calculateExponentTest();
         generateInitialVectorsTest();
         calculateGSDTest();
-        polynomialCyclicTypeCalculatingTest();
+        polynomialCyclicTypeTest();
         polynomialEqualsTest();
         System.out.println();
     }
@@ -100,18 +101,13 @@ public class AppTests {
 
         Field.mod = 3;
         test = new Polynomial(Arrays.asList(2, 2, 1)).getExp() == 8;
-
         test &= new Polynomial(Arrays.asList(1, 0, 2, 1)).getExp() == 26;
-
         test &= new Polynomial(Arrays.asList(2, 2, 2, 1)).getExp() == 13;
-
         test &= new Polynomial(Arrays.asList(2, 1, 0, 0, 1)).getExp() == 80;
-
         test &= new Polynomial(Arrays.asList(1, 1, 1, 1, 1)).getExp() == 5;
 
         Field.mod = 5;
         test &= new Polynomial(Arrays.asList(3, 1, 1, 1)).getExp() == 124;
-
         test &= new Polynomial(Arrays.asList(1, 4, 3, 1)).getExp() == 62;
 
         Instant finish = Instant.now();
@@ -185,13 +181,17 @@ public class AppTests {
         }
     }
 
-    public static void polynomialCyclicTypeCalculatingTest() {
+    public static void polynomialCyclicTypeTest() {
         Instant start = Instant.now();
         boolean test;
 
-        Field.mod = 2;
-        LRP lrp = new LRP(new RecurrentRelation(Arrays.asList(1, 1)), Arrays.asList(0, 1));
-        test = lrp.getCyclicType(lrp.getCyclicClasses()).equals("1y + 1y^3");
+        Field.mod = 4;
+        LRP lrp1 = new LRP(new RecurrentRelation(Collections.singletonList(3)), Collections.singletonList(1));
+        test = lrp1.getCyclicType(lrp1.getCyclicClasses()).equals("2y + y^2");
+
+//        Field.mod = 2;
+//        LRP lrp2 = new LRP(new RecurrentRelation(Arrays.asList(1, 0, 1, 1, 1, 0)), Arrays.asList(1,1,1,1,1, 1));
+//        test &= lrp2.getCyclicType(lrp2.getCyclicClasses()).equals("y + y^3 + 3y^5 + 3y^15");
 
         Instant finish = Instant.now();
         long testingTimeMillis = Duration.between(start, finish).toMillis();
@@ -218,6 +218,11 @@ public class AppTests {
         LRP lrp5 = new LRP(new RecurrentRelation(Arrays.asList(2, 0, 1, 1)), Arrays.asList(0, 2, 2, 0));
         LRP lrp6 = new LRP(new RecurrentRelation(Arrays.asList(2, 0, 1, 1)), Arrays.asList(1, 1, 0, 2));
         test &= lrp4.equals(lrp5) && lrp5.equals(lrp4) && !lrp4.equals(lrp6) && !lrp5.equals(lrp6);
+
+        Field.mod = 7;
+        LRP lrp7 = new LRP(new RecurrentRelation(Arrays.asList(2, 0, 1, 1, 6)), Arrays.asList(1, 1, 1, 0, 1));
+        LRP lrp8 = new LRP(new RecurrentRelation(Arrays.asList(2, 0, 1, 1, 6)), Arrays.asList(1, 0, 1, 1, 1));
+        test &= !lrp7.equals(lrp8);
 
         Instant finish = Instant.now();
         long testingTimeMillis = Duration.between(start, finish).toMillis();

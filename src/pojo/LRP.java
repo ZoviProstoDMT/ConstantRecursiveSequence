@@ -29,10 +29,6 @@ public class LRP extends Field {
         return calculateSequence(numberOfMembers);
     }
 
-    public List<Integer> getSequence() {
-        return calculateSequence(getPeriod());
-    }
-
     public Polynomial getCharacteristicPolynomial() {
         return characteristicPolynomial;
     }
@@ -97,15 +93,6 @@ public class LRP extends Field {
         return result;
     }
 
-    public List<Integer> multiply(Polynomial polynomial) {
-        List<Integer> result = getEmptyList(getPeriod());
-        for (int i = 0; i < polynomial.getCoefficients().size(); i++) {
-            LRP lrp = this.multiply(i, polynomial.getCoefficients().get(i));
-            result = sum(result, lrp.getSequence(getPeriod()));
-        }
-        return result;
-    }
-
     public Map<Polynomial, Integer> getDecompositionOfCharacteristicPolynomial() {
         if (decompositionOfCharacteristicPolynomial == null) {
             decompositionOfCharacteristicPolynomial = getCharacteristicPolynomial().decompose(getMinimalPolynomial());
@@ -123,6 +110,7 @@ public class LRP extends Field {
                                 .replace(" ", "Z").replace(",", " + "));
                 System.out.println();
                 List<Integer> compositionOfPeriods = new ArrayList<>();
+                int oldMod = Field.mod;
                 for (int i = 0; i < primeMembers.size(); i++) {
                     Field.mod = primeMembers.get(i);
                     LRP newLrp = new LRP(new RecurrentRelation(recurrentRelation.getCoefficients()), getInitialVector());
@@ -133,6 +121,7 @@ public class LRP extends Field {
                 }
                 System.out.println("Значит пероид будет равен = " + compositionOfPeriods);
                 period = LeastCommonMultiple.get(compositionOfPeriods.get(0), compositionOfPeriods.get(1));
+                Field.mod = oldMod;
             } else {
                 period = getMinimalPolynomial().getExp();
             }
@@ -193,6 +182,7 @@ public class LRP extends Field {
                 if (!cyclicClass.isEmpty() && cyclicClass.get(0).equals(lrp)) {
                     cyclicClass.add(lrp);
                     notEqualsLRP = false;
+                    break;
                 }
             }
             if (notEqualsLRP) {
@@ -219,7 +209,11 @@ public class LRP extends Field {
             if (classCount.getKey() == 1) {
                 cyclicType.append(String.format("%sy + ", classCount.getValue()));
             } else {
-                cyclicType.append(String.format("%sy^%s + ", classCount.getValue(), classCount.getKey()));
+                if (classCount.getValue() == 1) {
+                    cyclicType.append(String.format("y^%s + ", classCount.getKey()));
+                } else {
+                    cyclicType.append(String.format("%sy^%s + ", classCount.getValue(), classCount.getKey()));
+                }
             }
         }
         return String.valueOf(new StringBuilder(cyclicType.reverse().substring(3)).reverse());
@@ -237,7 +231,7 @@ public class LRP extends Field {
     public int hashCode() {
         int hashCode = 0;
         for (Integer integer : getSequence(getCharacteristicPolynomial().getExp())) {
-            hashCode += 31 * integer;
+            hashCode += integer;
         }
         return hashCode;
     }
@@ -251,6 +245,9 @@ public class LRP extends Field {
             if (!this.recurrentRelation.equals(((LRP) obj).recurrentRelation)) {
                 return false;
             }
+            if (initialVector.equals(((LRP) obj).getInitialVector())) {
+                return true;
+            }
             if (initialVector.stream().noneMatch(integer -> integer != 0) &&
                     ((LRP) obj).getInitialVector().stream().anyMatch(integer -> integer != 0)) {
                 return false;
@@ -262,15 +259,19 @@ public class LRP extends Field {
             if (this.hashCode() != obj.hashCode()) {
                 return false;
             }
-            int period = getPeriod();
-            LRP temp = new LRP(this.recurrentRelation, initialVector);
-            for (int i = 1; i < period; i++) {
-                temp = temp.multiply(1, 1);
-                if (temp.getSequence(period).equals(((LRP) obj).getSequence(period))) {
-                    return true;
-                }
+            int period;
+            if (this.period != 0) {
+                period = this.period;
+            } else if (((LRP) obj).period != 0) {
+                period = ((LRP) obj).period;
+            } else {
+                period = getPeriod();
             }
-            return false;
+            LRP temp = new LRP(this.recurrentRelation, initialVector);
+            String thisSeq = temp.getSequence(initialVector.size()).toString()
+                    .replace("[", "").replace("]", "");
+            String objSeq = ((LRP) obj).getSequence(period).toString();
+            return objSeq.contains(thisSeq);
         }
         return super.equals(obj);
     }

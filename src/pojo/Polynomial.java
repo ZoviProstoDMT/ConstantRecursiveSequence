@@ -176,8 +176,8 @@ public class Polynomial extends Field {
         if (coefficients.size() == 1) {
             return coefficients;
         }
-       if ( coefficients.stream().noneMatch(integer -> integer != 0)){
-           return getEmptyList(1);
+        if (coefficients.stream().noneMatch(integer -> integer != 0)) {
+            return getEmptyList(1);
         }
         for (int i = coefficients.size() - 1; i >= 0; i--) {
             if (coefficients.get(i) == 0) {
@@ -256,13 +256,16 @@ public class Polynomial extends Field {
     }
 
     public int getExp() {
+        if (!isReversible()) {
+            throw new RuntimeException("Cannot get exponent from non reversible polynomial - " + this);
+        }
         int degree = coefficients.size() - 1;
         int startDegree = coefficients.size() - 1;
         Polynomial polynomial = new Polynomial(coefficients.subList(0, coefficients.size() - 1)).revert().trimCoefficients();
         Polynomial startPolynomial = new Polynomial(polynomial.getCoefficients());
-        while (true) {
+        do {
             degree++;
-            Polynomial tempPolynomial = polynomial.multiply(new Polynomial(Arrays.asList(0, 1)));
+            Polynomial tempPolynomial = polynomial.multiply(1, 1);
             int olderDegree = tempPolynomial.getCoefficients().size() - 1;
             int olderCoefficient = tempPolynomial.getCoefficients().get(olderDegree);
             if (olderDegree != startDegree) {
@@ -274,10 +277,7 @@ public class Polynomial extends Field {
             Polynomial multipliedToOlderCoefficient = new Polynomial(startPolynomial.getCoefficients()).multiply(olderCoefficient, 0);
             polynomial = tempPolynomial.sum(multipliedToOlderCoefficient);
             polynomial.trimCoefficients();
-            if (polynomial.getCoefficients().size() == 1 && polynomial.getCoefficients().get(0) == 1) {
-                break;
-            }
-        }
+        } while (polynomial.getCoefficients().size() != 1 || polynomial.getCoefficients().get(0) != 1);
         return degree;
     }
 
