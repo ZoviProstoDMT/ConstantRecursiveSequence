@@ -2,8 +2,6 @@ package tests;
 
 import pojo.*;
 
-import java.time.Duration;
-import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
@@ -11,10 +9,10 @@ import java.util.List;
 public class AppTests {
 
     public static void main(String[] args) {
-        run();
+        new AppTests().run();
     }
 
-    public static void run() {
+    private void run() {
         System.out.println();
         generateToStringValuesTest();
         calculateGeneratorTest();
@@ -23,11 +21,13 @@ public class AppTests {
         calculateGSDTest();
         polynomialCyclicTypeTest();
         polynomialEqualsTest();
+        isDecomposableTest();
+        getITest();
         System.out.println();
     }
 
-    public static void generateToStringValuesTest() {
-        Instant start = Instant.now();
+    private void generateToStringValuesTest() {
+        TestTimer tt = new TestTimer();
         boolean test;
 
         Field.mod = 3;
@@ -51,19 +51,12 @@ public class AppTests {
         test &= r3.toString().equals("3C0 + 0C1 + 0C2 + 0C3 + 3C4 = C5") &&
                 p33.toString().equals("X^5 + X^4 + 1") && p3.toString().equals("X^5 + X^4 + 1");
 
-        Instant finish = Instant.now();
-        long testingTimeMillis = Duration.between(start, finish).toMillis();
-        String testingTime = testingTimeMillis / 1000 + "s " + testingTimeMillis % 1000 + "ms";
-
-        if (test) {
-            System.out.println("- TEST Создание текста для соотношений и многочленов - PASSED (" + testingTime + ")");
-        } else {
-            System.err.println("- TEST Создание текста для соотношений и многочленов - FAILED (" + testingTime + ")");
-        }
+        tt.stop();
+        showResult(test, tt);
     }
 
-    public static void calculateGeneratorTest() {
-        Instant start = Instant.now();
+    private void calculateGeneratorTest() {
+        TestTimer tt = new TestTimer();
         boolean test;
 
         Field.mod = 5;
@@ -84,19 +77,12 @@ public class AppTests {
         List<Integer> seq3 = lrp3.getSequence(20);
         test &= genSeq3.equals(seq3);
 
-        Instant finish = Instant.now();
-        long testingTimeMillis = Duration.between(start, finish).toMillis();
-        String testingTime = testingTimeMillis / 1000 + "s " + testingTimeMillis % 1000 + "ms";
-
-        if (test) {
-            System.out.println("- TEST Вычисление генератора последовательности - PASSED (" + testingTime + ")");
-        } else {
-            System.err.println("- TEST Вычисление генератора последовательности - FAILED (" + testingTime + ")");
-        }
+        tt.stop();
+        showResult(test, tt);
     }
 
-    public static void calculateExponentTest() {
-        Instant start = Instant.now();
+    private void calculateExponentTest() {
+        TestTimer tt = new TestTimer();
         boolean test;
 
         Field.mod = 3;
@@ -110,19 +96,12 @@ public class AppTests {
         test &= new Polynomial(Arrays.asList(3, 1, 1, 1)).getExp() == 124;
         test &= new Polynomial(Arrays.asList(1, 4, 3, 1)).getExp() == 62;
 
-        Instant finish = Instant.now();
-        long testingTimeMillis = Duration.between(start, finish).toMillis();
-        String testingTime = testingTimeMillis / 1000 + "s " + testingTimeMillis % 1000 + "ms";
-
-        if (test) {
-            System.out.println("- TEST Вычисление экспоненты многочлена - PASSED ( " + testingTime + ")");
-        } else {
-            System.err.println("- TEST Вычисление экспоненты многочлена - FAILED (" + testingTime + ")");
-        }
+        tt.stop();
+        showResult(test, tt);
     }
 
-    public static void generateInitialVectorsTest() {
-        Instant start = Instant.now();
+    private void generateInitialVectorsTest() {
+        TestTimer tt = new TestTimer();
         boolean test;
 
         Field.mod = 3;
@@ -140,19 +119,12 @@ public class AppTests {
         List<List<Integer>> list3 = Field.generateInitialVectors(dim);
         test &= Math.pow(Field.mod, dim) == list3.size();
 
-        Instant finish = Instant.now();
-        long testingTimeMillis = Duration.between(start, finish).toMillis();
-        String testingTime = testingTimeMillis / 1000 + "s " + testingTimeMillis % 1000 + "ms";
-
-        if (test) {
-            System.out.println("- TEST Генерация всевозможных начальных векторов - PASSED (" + testingTime + ")");
-        } else {
-            System.err.println("- TEST Генерация всевозможных начальных векторов - FAILED (" + testingTime + ")");
-        }
+        tt.stop();
+        showResult(test, tt);
     }
 
-    public static void calculateGSDTest() {
-        Instant start = Instant.now();
+    private void calculateGSDTest() {
+        TestTimer tt = new TestTimer();
         boolean test;
 
         Field.mod = 3;
@@ -170,42 +142,29 @@ public class AppTests {
         test &= GreatestCommonDivisor.get(new Polynomial(Arrays.asList(2, 2, 2, 3, 1)),
                 new Polynomial(Arrays.asList(0, 0, 0, 4, 2, 1))).toString().equals("1");
 
-        Instant finish = Instant.now();
-        long testingTimeMillis = Duration.between(start, finish).toMillis();
-        String testingTime = testingTimeMillis / 1000 + "s " + testingTimeMillis % 1000 + "ms";
-
-        if (test) {
-            System.out.println("- TEST Вычисление НОД - PASSED (" + testingTime + ")");
-        } else {
-            System.err.println("- TEST Вычисление НОД - FAILED (" + testingTime + ")");
-        }
+        tt.stop();
+        showResult(test, tt);
     }
 
-    public static void polynomialCyclicTypeTest() {
-        Instant start = Instant.now();
+    private void polynomialCyclicTypeTest() {
+        TestTimer tt = new TestTimer();
         boolean test;
 
         Field.mod = 4;
         LRP lrp1 = new LRP(new RecurrentRelation(Collections.singletonList(3)), Collections.singletonList(1));
         test = lrp1.getCyclicType(lrp1.getCyclicClasses()).equals("2y + y^2");
 
+//todo Починить нахождение экспоненты для нереверсивного полинома (напр. X^3 + X^2 + X)
 //        Field.mod = 2;
-//        LRP lrp2 = new LRP(new RecurrentRelation(Arrays.asList(1, 0, 1, 1, 1, 0)), Arrays.asList(1,1,1,1,1, 1));
+//        LRP lrp2 = new LRP(new RecurrentRelation(Arrays.asList(1, 0, 1, 1, 1, 0)), Arrays.asList(1, 1, 1, 1, 1, 1));
 //        test &= lrp2.getCyclicType(lrp2.getCyclicClasses()).equals("y + y^3 + 3y^5 + 3y^15");
 
-        Instant finish = Instant.now();
-        long testingTimeMillis = Duration.between(start, finish).toMillis();
-        String testingTime = testingTimeMillis / 1000 + "s " + testingTimeMillis % 1000 + "ms";
-
-        if (test) {
-            System.out.println("- TEST Циклический тип - PASSED (" + testingTime + ")");
-        } else {
-            System.err.println("- TEST Циклический тип - FAILED (" + testingTime + ")");
-        }
+        tt.stop();
+        showResult(test, tt);
     }
 
-    public static void polynomialEqualsTest() {
-        Instant start = Instant.now();
+    private void polynomialEqualsTest() {
+        TestTimer tt = new TestTimer();
         boolean test;
 
         Field.mod = 3;
@@ -224,14 +183,41 @@ public class AppTests {
         LRP lrp8 = new LRP(new RecurrentRelation(Arrays.asList(2, 0, 1, 1, 6)), Arrays.asList(1, 0, 1, 1, 1));
         test &= !lrp7.equals(lrp8);
 
-        Instant finish = Instant.now();
-        long testingTimeMillis = Duration.between(start, finish).toMillis();
-        String testingTime = testingTimeMillis / 1000 + "s " + testingTimeMillis % 1000 + "ms";
+        tt.stop();
+        showResult(test, tt);
+    }
 
-        if (test) {
-            System.out.println("- TEST Эквивалентность многочленов - PASSED (" + testingTime + ")");
+    private void isDecomposableTest() {
+        TestTimer tt = new TestTimer();
+        boolean test;
+
+        Field.mod = 3;
+        LRP lrp1 = new LRP(new RecurrentRelation(Arrays.asList(2, 0, 1, 1)), Arrays.asList(0, 0, 0, 1));
+        test = lrp1.getCharacteristicPolynomial().isDecomposable() == Boolean.TRUE;
+
+        tt.stop();
+        showResult(test, tt);
+    }
+
+    private void getITest() {
+        TestTimer tt = new TestTimer();
+        boolean test;
+
+        Field.mod = 3;
+        LRP lrp1 = new LRP(new RecurrentRelation(Arrays.asList(2, 0, 1, 1)), Arrays.asList(0, 0, 0, 1));
+        test = lrp1.getI(2) != 0 && lrp1.getI(4) == 0;
+
+        tt.stop();
+        showResult(test, tt);
+    }
+
+    private void showResult(boolean result, TestTimer tt) {
+        String testName = Thread.currentThread().getStackTrace()[2].getMethodName();
+
+        if (result) {
+            System.out.printf("- TEST '%s' - PASSED (%s)\n", testName, tt);
         } else {
-            System.err.println("- TEST Эквивалентность многочленов - FAILED (" + testingTime + ")");
+            System.err.printf("- TEST '%s' - FAILED (%s)\n", testName, tt);
         }
     }
 }

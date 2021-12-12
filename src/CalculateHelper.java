@@ -2,7 +2,6 @@ import pojo.*;
 
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 public class CalculateHelper {
@@ -13,7 +12,7 @@ public class CalculateHelper {
 
     private static void showSimpleDemo() {
         Field.mod = 3;
-        RecurrentRelation recurrentRelation = new RecurrentRelation(Arrays.asList(1, 0, 1));
+        RecurrentRelation recurrentRelation = new RecurrentRelation(Arrays.asList(-1, -1, -1));
         LRP lrp = new LRP(recurrentRelation, Arrays.asList(1, 1, 1));
         showInformationAbout(lrp);
     }
@@ -25,11 +24,12 @@ public class CalculateHelper {
         System.out.print("F(x): " + characteristicPolynomial + " -- " +
                 (characteristicPolynomial.isReversible() ? "реверсивный, " : "не реверсивный, "));
         Polynomial minimalPolynomial = lrp.getMinimalPolynomial();
-        Map<Polynomial, Integer> decomposeOfCharacteristicPolynomial = characteristicPolynomial.decompose(minimalPolynomial);
-        System.out.println(!(decomposeOfCharacteristicPolynomial.size() > 1) ? "неприводимый" :
-                "приводимый, раскладывается на " + decomposeOfCharacteristicPolynomial);
+        System.out.println(!characteristicPolynomial.isDecomposable() ? "неприводимый" :
+                "приводимый, раскладывается на " + characteristicPolynomial.getDecomposeOfPolynomial());
         Polynomial generator = lrp.getGenerator();
         System.out.println("Период T(x): " + lrp.getPeriod());
+        System.out.println("Данная ЛРП имеет " + (lrp.getPeriod() == (Math.pow(Field.mod, characteristicPolynomial.getDegree()) - 1) ?
+                "максимальный период" : "не максимальный период"));
         System.out.println("Генератор G(x): " + generator);
         System.out.println("НОД (F(x), G(x)): " + GreatestCommonDivisor.get(characteristicPolynomial, generator));
         System.out.println("Минимальный многочлен M(x): " + minimalPolynomial);

@@ -219,6 +219,10 @@ public class LRP extends Field {
         return String.valueOf(new StringBuilder(cyclicType.reverse().substring(3)).reverse());
     }
 
+    public int getI(int a) {
+        return getSequence(getPeriod()).indexOf(a) + 1;
+    }
+
     private List<Integer> getEmptyList(int size) {
         List<Integer> list = new ArrayList<>();
         for (int i = 0; i < size; i++) {

@@ -1,9 +1,12 @@
 package pojo;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.util.*;
 
 public class Polynomial extends Field {
 
+    Map<Polynomial, Integer> decomposeOfPolynomial;
     private List<Integer> coefficients;
     private Polynomial remainder;
 
@@ -38,6 +41,56 @@ public class Polynomial extends Field {
 
     public int getHighestCoefficient() {
         return coefficients.get(coefficients.size() - 1);
+    }
+
+    public boolean isDecomposable() {
+        return getDecomposeOfPolynomial().size() > 1;
+    }
+
+    public Map<Polynomial, Integer> getDecomposeOfPolynomial(Polynomial member) {
+        if (decomposeOfPolynomial == null) {
+            decomposeOfPolynomial = this.decompose(member);
+        }
+        return decomposeOfPolynomial;
+    }
+
+    public Map<Polynomial, Integer> getDecomposeOfPolynomial() {
+        if (decomposeOfPolynomial == null) {
+            Polynomial minimalDecomposeMember = getMinimalDecomposeMember();
+            if (minimalDecomposeMember == null) {
+                decomposeOfPolynomial = new HashMap<>();
+                decomposeOfPolynomial.put(this, 1);
+            } else {
+                decomposeOfPolynomial = this.decompose(minimalDecomposeMember);
+            }
+        }
+        return decomposeOfPolynomial;
+    }
+
+    @Nullable
+    public Polynomial getMinimalDecomposeMember() {
+        Polynomial decomposition = null;
+        Set<Polynomial> allPolynomials = Field.getAllPolynomials(getDegree());
+        for (Polynomial p1 : allPolynomials) {
+            if (p1.getDegree() == 0 || p1.getHighestCoefficient() != 1) {
+                continue;
+            }
+            for (Polynomial p2 : allPolynomials) {
+                if (p2.getDegree() == 0 || p2.getHighestCoefficient() != 1) {
+                    continue;
+                }
+                Polynomial multiplyResult = p1.multiply(p2);
+                if (multiplyResult.equals(this)) {
+                    Polynomial temp = (p1.getDegree() < p2.getDegree() ? p1 : p2);
+                    if (decomposition == null) {
+                        decomposition = temp;
+                    } else {
+                        decomposition = decomposition.getDegree() <= temp.getDegree() ? decomposition : temp;
+                    }
+                }
+            }
+        }
+        return decomposition;
     }
 
     private void reverseCoefficients(List<Integer> coefficients) {

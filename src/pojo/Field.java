@@ -1,10 +1,17 @@
 package pojo;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 public class Field {
     public static int mod;
+
+    public static void main(String[] args) {
+        mod = 16;
+        System.out.println(getPrimeMembers());
+    }
 
     public static List<Integer> normalizeCoefficients(List<Integer> coefficients) {
         ArrayList<Integer> result = new ArrayList<>();
@@ -32,6 +39,15 @@ public class Field {
             }
         }
         return vectors;
+    }
+
+    public static Set<Polynomial> getAllPolynomials(int degree) {
+        Set<Polynomial> polynomials = new HashSet<>();
+        List<List<Integer>> initialVectors = generateInitialVectors(degree);
+        for (List<Integer> initialVector : initialVectors) {
+            polynomials.add(new Polynomial(initialVector));
+        }
+        return polynomials;
     }
 
     private static List<Integer> getEmptyVector(int vectorDimension) {
@@ -62,28 +78,6 @@ public class Field {
             }
         }
         return true;
-    }
-
-    public static List<Polynomial> getAllDecomposablePolynomials(int degree) {
-        List<Polynomial> decomposablePolynomials = new ArrayList<>();
-        List<List<Integer>> initialVectors = generateInitialVectors(degree);
-        for (List<Integer> initialVector1 : initialVectors) {
-            Polynomial p1 = new Polynomial(initialVector1);
-            if (p1.getDegree() == 0) {
-                continue;
-            }
-            for (List<Integer> initialVector2 : initialVectors) {
-                Polynomial p2 = new Polynomial(initialVector2);
-                if (p2.getDegree() == 0) {
-                    continue;
-                }
-                Polynomial multiplyResult = p1.multiply(p2);
-                if (multiplyResult.getDegree() == degree && !decomposablePolynomials.contains(multiplyResult)) {
-                    decomposablePolynomials.add(multiplyResult);
-                }
-            }
-        }
-        return decomposablePolynomials;
     }
 
     public static List<Integer> getPrimeMembers() {
