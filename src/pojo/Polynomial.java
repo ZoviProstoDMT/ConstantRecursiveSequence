@@ -1,18 +1,15 @@
 package pojo;
 
+import helper.Converter;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
-public class Polynomial extends Field {
+public class Polynomial extends Field implements Converter {
 
-    Map<Polynomial, Integer> decomposeOfPolynomial;
-    private List<Integer> coefficients;
+    DecompositionOfPolynomial decomposeOfPolynomial;
+    private final List<Integer> coefficients;
     private Polynomial remainder;
-
-    public Polynomial(RecurrentRelation recurrentRelation) {
-        reverseCoefficients(recurrentRelation.getCoefficients());
-    }
 
     public Polynomial(List<Integer> coefficients) {
         this.coefficients = trimCoefficients(convertToField(coefficients));
@@ -47,18 +44,10 @@ public class Polynomial extends Field {
         return getDecomposeOfPolynomial().size() > 1;
     }
 
-    public Map<Polynomial, Integer> getDecomposeOfPolynomial(Polynomial member) {
-        if (decomposeOfPolynomial == null) {
-            decomposeOfPolynomial = this.decompose(member);
-        }
-        return decomposeOfPolynomial;
-    }
-
-    public Map<Polynomial, Integer> getDecomposeOfPolynomial() {
+    public DecompositionOfPolynomial getDecomposeOfPolynomial() {
         if (decomposeOfPolynomial == null) {
             Polynomial minimalDecomposeMember = getMinimalDecomposeMember();
             if (minimalDecomposeMember == null) {
-                decomposeOfPolynomial = new HashMap<>();
                 decomposeOfPolynomial.put(this, 1);
             } else {
                 decomposeOfPolynomial = this.decompose(minimalDecomposeMember);
@@ -91,15 +80,6 @@ public class Polynomial extends Field {
             }
         }
         return decomposition;
-    }
-
-    private void reverseCoefficients(List<Integer> coefficients) {
-        this.coefficients = new ArrayList<>();
-        coefficients.forEach(coefficient -> {
-            int revertedCoefficient = coefficient * -1;
-            this.coefficients.add(revertedCoefficient == 0 ? 0 : revertedCoefficient + mod);
-        });
-        this.coefficients.add(1);
     }
 
     public Polynomial divide(Polynomial polynomial) {
@@ -283,7 +263,7 @@ public class Polynomial extends Field {
         return getCoefficients().get(0) != 0;
     }
 
-    public Map<Polynomial, Integer> decompose(Polynomial minimalPolynomial) {
+    public DecompositionOfPolynomial decompose(Polynomial minimalPolynomial) {
         Map<Polynomial, Integer> decompositionOfCharacteristicPolynomial = new HashMap<>();
         if (minimalPolynomial.getDegree() != getDegree() || minimalPolynomial.getCoefficients().size() == 1) {
             Polynomial temp = this;
@@ -305,7 +285,7 @@ public class Polynomial extends Field {
         } else {
             decompositionOfCharacteristicPolynomial.put(this, 1);
         }
-        return decompositionOfCharacteristicPolynomial;
+        return new DecompositionOfPolynomial(decompositionOfCharacteristicPolynomial);
     }
 
     public int getExp() {
@@ -386,5 +366,37 @@ public class Polynomial extends Field {
             }
         }
         return String.valueOf(result).isEmpty() ? "0" : String.valueOf(result);
+    }
+}
+
+class DecompositionOfPolynomial {
+    Map<Polynomial, Integer> decomposeOfPolynomial;
+
+    public DecompositionOfPolynomial(Map<Polynomial, Integer> decomposeOfPolynomial) {
+        this.decomposeOfPolynomial = decomposeOfPolynomial;
+    }
+
+    public int size() {
+        return decomposeOfPolynomial.size();
+    }
+
+    public void put(Polynomial polynomial, int degree) {
+        if (decomposeOfPolynomial == null) {
+            decomposeOfPolynomial = new HashMap<>();
+        }
+        decomposeOfPolynomial.put(polynomial, degree);
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder sb = new StringBuilder();
+        decomposeOfPolynomial.forEach((polynomial, degree) -> {
+            if (degree > 1) {
+                sb.append("(").append(polynomial).append(")^").append(degree);
+            } else {
+                sb.append("(").append(polynomial).append(")");
+            }
+        });
+        return new String(sb);
     }
 }

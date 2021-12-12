@@ -1,16 +1,18 @@
 package pojo;
 
+import helper.Converter;
+
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class LRP extends Field {
+public class LRP extends Field implements Converter {
 
     private final RecurrentRelation recurrentRelation;
     private final List<Integer> initialVector;
     private final Polynomial characteristicPolynomial;
-    private Map<Polynomial, Integer> decompositionOfCharacteristicPolynomial;
+    private DecompositionOfPolynomial decompositionOfCharacteristicPolynomial;
     private Polynomial minimalPolynomial;
     private Polynomial generatorPolynomial;
     private int period = 0;
@@ -18,7 +20,13 @@ public class LRP extends Field {
     public LRP(RecurrentRelation recurrentRelation, List<Integer> initialVector) {
         this.recurrentRelation = recurrentRelation;
         this.initialVector = normalizeCoefficients(initialVector).subList(0, recurrentRelation.getDegree());
-        characteristicPolynomial = new Polynomial(recurrentRelation);
+        characteristicPolynomial = convertFrom(recurrentRelation);
+    }
+
+    public LRP(Polynomial characteristicPolynomial, List<Integer> initialVector) {
+        this.characteristicPolynomial = characteristicPolynomial;
+        this.initialVector = initialVector;
+        recurrentRelation = convertFrom(characteristicPolynomial);
     }
 
     public List<Integer> getInitialVector() {
@@ -93,9 +101,9 @@ public class LRP extends Field {
         return result;
     }
 
-    public Map<Polynomial, Integer> getDecompositionOfCharacteristicPolynomial() {
+    public DecompositionOfPolynomial getDecompositionOfCharacteristicPolynomial() {
         if (decompositionOfCharacteristicPolynomial == null) {
-            decompositionOfCharacteristicPolynomial = getCharacteristicPolynomial().decompose(getMinimalPolynomial());
+            decompositionOfCharacteristicPolynomial = getCharacteristicPolynomial().getDecomposeOfPolynomial();
         }
         return decompositionOfCharacteristicPolynomial;
     }

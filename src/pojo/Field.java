@@ -8,11 +8,6 @@ import java.util.Set;
 public class Field {
     public static int mod;
 
-    public static void main(String[] args) {
-        mod = 16;
-        System.out.println(getPrimeMembers());
-    }
-
     public static List<Integer> normalizeCoefficients(List<Integer> coefficients) {
         ArrayList<Integer> result = new ArrayList<>();
         for (int i = 0; i < coefficients.size(); i++) {

@@ -21,17 +21,20 @@ public class CalculateHelper {
         System.out.println("============================================");
         System.out.println("Z[x] = " + Field.mod + "\n");
         Polynomial characteristicPolynomial = lrp.getCharacteristicPolynomial();
-        System.out.print("F(x): " + characteristicPolynomial + " -- " +
-                (characteristicPolynomial.isReversible() ? "реверсивный, " : "не реверсивный, "));
-        Polynomial minimalPolynomial = lrp.getMinimalPolynomial();
-        System.out.println(!characteristicPolynomial.isDecomposable() ? "неприводимый" :
-                "приводимый, раскладывается на " + characteristicPolynomial.getDecomposeOfPolynomial());
+        System.out.println("F(x): " + characteristicPolynomial + " -- " +
+                (characteristicPolynomial.isReversible() ? "реверсивный" : "не реверсивный"));
+        System.out.println(!characteristicPolynomial.isDecomposable() ? "Неприводимый" :
+                "Приводимый, раскладывается на " + lrp.getDecompositionOfCharacteristicPolynomial());
+        if (characteristicPolynomial.isDecomposable()) {
+
+        }
         Polynomial generator = lrp.getGenerator();
         System.out.println("Период T(x): " + lrp.getPeriod());
         System.out.println("Данная ЛРП имеет " + (lrp.getPeriod() == (Math.pow(Field.mod, characteristicPolynomial.getDegree()) - 1) ?
                 "максимальный период" : "не максимальный период"));
         System.out.println("Генератор G(x): " + generator);
         System.out.println("НОД (F(x), G(x)): " + GreatestCommonDivisor.get(characteristicPolynomial, generator));
+        Polynomial minimalPolynomial = lrp.getMinimalPolynomial();
         System.out.println("Минимальный многочлен M(x): " + minimalPolynomial);
         System.out.println();
         if (characteristicPolynomial.isReversible()) {

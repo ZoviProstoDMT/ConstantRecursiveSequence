@@ -1,6 +1,5 @@
 package pojo;
 
-import java.util.ArrayList;
 import java.util.List;
 
 public class RecurrentRelation extends Field {
@@ -11,18 +10,6 @@ public class RecurrentRelation extends Field {
     public RecurrentRelation(List<Integer> coefficients) {
         this.coefficients = normalizeCoefficients(coefficients);
         this.degree = this.coefficients.size();
-    }
-
-    private List<Integer> trimCoefficients(List<Integer> coefficients) {
-        List<Integer> list = new ArrayList<>(coefficients);
-        for (int i = coefficients.size() - 1; i >= 0; i--) {
-            if (coefficients.get(i) == 0) {
-                list.remove(i);
-            } else {
-                break;
-            }
-        }
-        return list;
     }
 
     public int getDegree() {
