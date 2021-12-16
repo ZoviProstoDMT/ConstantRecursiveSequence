@@ -9,8 +9,8 @@ import java.util.*;
 
 public class Polynomial extends Field implements Converter {
 
+    private final List<Integer> coefficients;
     DecompositionOfPolynomial decomposeOfPolynomial;
-    private List<Integer> coefficients;
     private Polynomial remainder;
 
     public Polynomial(List<Integer> coefficients) {
@@ -62,7 +62,7 @@ public class Polynomial extends Field implements Converter {
     }
 
     public boolean isDecomposable() {
-        return getDecomposeOfPolynomial().size() > 1;
+        return getDecomposeOfPolynomial().isDecomposable();
     }
 
     public DecompositionOfPolynomial getDecomposeOfPolynomial() {
@@ -138,7 +138,7 @@ public class Polynomial extends Field implements Converter {
             return result;
         }
         int tempDegree = this.trimCoefficients().getDegree() - polynomial.trimCoefficients().getDegree();
-        int tempCoefficient = (this.getHighestCoefficient() * getReverseNumber(polynomial.getHighestCoefficient()) % mod);
+        int tempCoefficient = (this.getHighestCoefficient() * getReverseNumber(polynomial.getHighestCoefficient()) % Field.getMod());
         Polynomial result = getMonomial(tempDegree, tempCoefficient);
         Polynomial remainder = this.subtract(result.multiply(polynomial));
         result.setRemainder(remainder);
@@ -170,7 +170,7 @@ public class Polynomial extends Field implements Converter {
             List<Integer> coefficients = new ArrayList<>(this.coefficients);
             List<Integer> newCoefficients = getEmptyList(coefficients.size() + degree);
             for (int i = 0; i < coefficients.size(); i++) {
-                newCoefficients.set(i + degree, (coefficients.get(i) * coefficient) % mod);
+                newCoefficients.set(i + degree, (coefficients.get(i) * coefficient) % Field.getMod());
             }
             return new Polynomial(newCoefficients).trimCoefficients();
         }
@@ -183,12 +183,12 @@ public class Polynomial extends Field implements Converter {
     public Polynomial sum(Polynomial polynomial) {
         if (this.coefficients.size() > polynomial.getCoefficients().size()) {
             for (int i = 0; i < polynomial.getCoefficients().size(); i++) {
-                this.coefficients.set(i, (polynomial.getCoefficients().get(i) + this.coefficients.get(i)) % mod);
+                this.coefficients.set(i, (polynomial.getCoefficients().get(i) + this.coefficients.get(i)) % Field.getMod());
             }
             return this;
         } else {
             for (int i = 0; i < this.coefficients.size(); i++) {
-                polynomial.getCoefficients().set(i, (polynomial.getCoefficients().get(i) + this.coefficients.get(i)) % mod);
+                polynomial.getCoefficients().set(i, (polynomial.getCoefficients().get(i) + this.coefficients.get(i)) % Field.getMod());
             }
             return polynomial;
         }
@@ -253,23 +253,23 @@ public class Polynomial extends Field implements Converter {
 
     private int getReverseNumber(int number) {
         while (number < 0) {
-            number += mod;
+            number += Field.getMod();
         }
-        for (int i = 0; i < mod; i++) {
-            if ((number * i) % mod == 1) {
+        for (int i = 0; i < Field.getMod(); i++) {
+            if ((number * i) % Field.getMod() == 1) {
                 return i;
             }
         }
-        throw new RuntimeException("There are no reverse number for " + number + " in Z" + mod);
+        throw new RuntimeException("There are no reverse number for " + number + " in Z" + Field.getMod());
     }
 
     private List<Integer> convertToField(List<Integer> coefficients) {
         ArrayList<Integer> res = new ArrayList<>();
         coefficients.forEach(c -> {
             while (c < 0) {
-                c += mod;
+                c += Field.getMod();
             }
-            res.add(c % mod);
+            res.add(c % Field.getMod());
         });
         return res;
     }
@@ -332,10 +332,14 @@ public class Polynomial extends Field implements Converter {
 
     public int getExp() {
         if (!isReversible()) {
+            if (getDegree() == 1) {
+                return 2;
+            }
             int exp = 1;
             for (Map.Entry<Polynomial, Integer> member : getDecomposeOfPolynomial().getDecompositionMap().entrySet()) {
                 Polynomial polynomial = member.getKey();
-                exp = LeastCommonMultiple.get(exp, polynomial.getExp());
+                int tempExp = polynomial.getExp();
+                exp = LeastCommonMultiple.get(exp, tempExp);
             }
 //            throw new RuntimeException("Cannot get exponent from non reversible polynomial - " + this);
             return exp;

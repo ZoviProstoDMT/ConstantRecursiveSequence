@@ -29,6 +29,15 @@ public class DecompositionOfPolynomial {
         decomposeOfPolynomial.put(polynomial, degree);
     }
 
+    public boolean isDecomposable() {
+        if (decomposeOfPolynomial == null || decomposeOfPolynomial.size() == 0) {
+            return false;
+        } else if (decomposeOfPolynomial.size() == 1) {
+            return decomposeOfPolynomial.values().stream().findFirst().orElse(0) > 1;
+        }
+        return size() > 1;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();

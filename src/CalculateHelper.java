@@ -1,7 +1,6 @@
 import pojo.Field;
 import pojo.GreatestCommonDivisor;
 import pojo.LRP;
-import pojo.RecurrentRelation;
 import pojo.polynomial.Polynomial;
 
 import java.util.Arrays;
@@ -15,15 +14,14 @@ public class CalculateHelper {
     }
 
     private static void showSimpleDemo() {
-        Field.mod = 8;
-        LRP lrp = new LRP(new Polynomial(Arrays.asList(2, 2, 1)));
-        lrp.getPrimaryPeriod();
-//        showInformationAbout(lrp);
+        Field.setMod(8);
+        LRP lrp = new LRP(new Polynomial(Arrays.asList(1, 0, 1, 1)));
+        showInformationAbout(lrp);
     }
 
     private static void showInformationAbout(LRP lrp) {
         System.out.println("============================================");
-        System.out.println("Z[x] = " + Field.mod + "\n");
+        System.out.println("Z[x] = " + Field.getMod() + "\n");
         Polynomial characteristicPolynomial = lrp.getCharacteristicPolynomial();
         System.out.println("F(x): " + characteristicPolynomial + " -- " +
                 (characteristicPolynomial.isReversible() ? "реверсивный" : "не реверсивный"));
@@ -36,8 +34,7 @@ public class CalculateHelper {
         }
         Polynomial generator = lrp.getGenerator();
         System.out.println("Период T(x): " + lrp.getPeriod());
-        System.out.println("Данная ЛРП имеет " + (lrp.getPeriod() == (Math.pow(Field.mod, characteristicPolynomial.getDegree()) - 1) ?
-                "максимальный период" : "не максимальный период"));
+        System.out.println("Данная ЛРП имеет " + (lrp.isPeriodLargest() ? "максимальный период" : "не максимальный период"));
         System.out.println("Генератор G(x): " + generator);
         System.out.println("НОД (F(x), G(x)): " + GreatestCommonDivisor.get(characteristicPolynomial, generator));
         Polynomial minimalPolynomial = lrp.getMinimalPolynomial();
@@ -51,7 +48,7 @@ public class CalculateHelper {
                 List<LRP> cyclicClass = cyclicClasses.get(i);
                 System.out.println("[" + (i + 1) + "] " + cyclicClass);
             }
-            String cyclicType = lrp.getCyclicType(cyclicClasses);
+            String cyclicType = lrp.getCyclicType();
             System.out.println("Циклический тип: " + cyclicType);
         } else {
             System.out.println("Невозможно получить информацию о циклическом типе, так как многочлен не реверсивный");

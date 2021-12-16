@@ -15,6 +15,7 @@ public class LRP extends Field implements Converter {
     private Polynomial minimalPolynomial;
     private Polynomial generatorPolynomial;
     private int period = 0;
+    private boolean isPeriodLargest;
 
     public LRP(RecurrentRelation recurrentRelation, List<Integer> initialVector) {
         this.recurrentRelation = recurrentRelation;
@@ -50,6 +51,17 @@ public class LRP extends Field implements Converter {
         return new LRP(recurrentRelation, getImpulseVector());
     }
 
+    public boolean isPeriodLargest() {
+        if (period == 0) {
+            return false;
+        } else if (isModPrime()) {
+            isPeriodLargest = period == (Math.pow(Field.getMod(), characteristicPolynomial.getDegree()) - 1);
+        } else if (isModPrimary()) {
+            isPeriodLargest = period == (Math.pow(Field.getMod(), characteristicPolynomial.getDegree()) - 1) * (Math.pow(Field.getMod(), Field.fieldInfo.getN() - 1));
+        }
+        return isPeriodLargest;
+    }
+
     private List<Integer> getImpulseVector() {
         if (characteristicPolynomial.getDegree() == 0) {
             return characteristicPolynomial.getCoefficients();
@@ -65,7 +77,7 @@ public class LRP extends Field implements Converter {
         for (int i = 0; i < numberOfMembers - initialVector.size(); i++) {
             int nextMemberOfSequence = getNextMemberOfSequence(recurrentRelation, tempU0);
             while (nextMemberOfSequence < 0) {
-                nextMemberOfSequence += Field.mod;
+                nextMemberOfSequence += Field.getMod();
             }
             tempU0 = makeALeftShiftForSequence(tempU0, nextMemberOfSequence);
             resultSequence.add(nextMemberOfSequence);
@@ -80,8 +92,8 @@ public class LRP extends Field implements Converter {
         }
         for (int i = 0; i < u0.size(); i++) {
             int member = recurrentRelation.getCoefficients().get(i) * u0.get(i);
-            result += member % mod;
-            result %= mod;
+            result += member % Field.getMod();
+            result %= Field.getMod();
         }
         return result;
     }
@@ -98,7 +110,7 @@ public class LRP extends Field implements Converter {
                 calculatedSequence = calculatedSequence.subList(degreeOfMonomial, calculatedSequence.size() - 1);
             }
             for (int i = 0; i < calculatedSequence.size(); i++) {
-                calculatedSequence.set(i, (calculatedSequence.get(i) * coefficientOfMonomial) % mod);
+                calculatedSequence.set(i, (calculatedSequence.get(i) * coefficientOfMonomial) % Field.getMod());
             }
         }
         return new LRP(recurrentRelation, calculatedSequence.subList(0, recurrentRelation.getDegree()));
@@ -121,38 +133,24 @@ public class LRP extends Field implements Converter {
     }
 
     public int getPeriod() {
+        int oldMod = Field.getMod();
         if (period == 0) {
-            if (!Field.isModPrime()) {
-                System.out.print("Z[x] не является простым. Рассмотрим композицию: ");
-                List<Integer> primeMembers = Field.getPrimeMembers();
-                System.out.println("Z" + Field.mod + " = " +
-                        primeMembers.toString().replace("[", "Z").replace("]", "")
-                                .replace(" ", "Z").replace(",", " + "));
-                System.out.println();
-                List<Integer> compositionOfPeriods = new ArrayList<>();
-                int oldMod = Field.mod;
-                for (int i = 0; i < primeMembers.size(); i++) {
-                    Field.mod = primeMembers.get(i);
-                    LRP newLrp = new LRP(new RecurrentRelation(recurrentRelation.getCoefficients()), getInitialVector());
-                    System.out.println("F" + i + "(x) = " + newLrp.getCharacteristicPolynomial() + " (mod " + Field.mod + ")");
-                    System.out.println("T" + i + "(x) = " + newLrp.getPeriod());
-                    System.out.println();
-                    compositionOfPeriods.add(newLrp.getPeriod());
-                }
-                System.out.println("Значит пероид будет равен = " + compositionOfPeriods);
-                period = LeastCommonMultiple.get(compositionOfPeriods.get(0), compositionOfPeriods.get(1));
-                Field.mod = oldMod;
-            } else {
+            if (Field.isModPrime()) {
                 period = getMinimalPolynomial().getExp();
+            } else if (Field.isModPrimary()) {
+                period = getPrimaryPeriod();
+            } else {
+                period = getComplexPeriod();
             }
         }
+        Field.setMod(oldMod);
         return period;
     }
 
     private List<Integer> sum(List<Integer> one, List<Integer> two) {
         List<Integer> result = new ArrayList<>();
         for (int i = 0; i < one.size(); i++) {
-            result.add((one.get(i) + two.get(i)) % mod);
+            result.add((one.get(i) + two.get(i)) % Field.getMod());
         }
         return result;
     }
@@ -169,7 +167,7 @@ public class LRP extends Field implements Converter {
                 for (int j = degree - 1; !nextStep; ) {
                     for (int ii = i - 1; ii >= 0; ii--) {
                         result -= f.get(j) * initialVector.get(ii);
-                        result %= mod;
+                        result %= Field.getMod();
                         j--;
                         if (ii == 0) {
                             nextStep = true;
@@ -214,56 +212,69 @@ public class LRP extends Field implements Converter {
         return cyclicClasses;
     }
 
-    public String getCyclicType(List<List<LRP>> cyclicClasses) {
-        Map<Integer, Integer> cyclicClassesCount = new HashMap<>();
-        StringBuilder cyclicType = new StringBuilder();
-        for (List<LRP> cyclicClass : cyclicClasses) {
-            int size = cyclicClass.size();
-            if (cyclicClassesCount.containsKey(size)) {
-                cyclicClassesCount.put(size, cyclicClassesCount.get(size) + 1);
-            } else {
-                cyclicClassesCount.put(size, 1);
-            }
-        }
-        for (Map.Entry<Integer, Integer> classCount : cyclicClassesCount.entrySet()) {
-            if (classCount.getKey() == 1) {
-                cyclicType.append(String.format("%sy + ", classCount.getValue()));
-            } else {
-                if (classCount.getValue() == 1) {
-                    cyclicType.append(String.format("y^%s + ", classCount.getKey()));
+    public String getCyclicType() {
+        if (isModPrime()) {
+            return getCyclicTypeForPrimeMod();
+        } else if (isModPrimary()) {
+            return getCyclicTypeForPrimaryMod();
+        } else {
+            Map<Integer, Integer> cyclicClassesCount = new HashMap<>();
+            StringBuilder cyclicType = new StringBuilder();
+            for (List<LRP> cyclicClass : getCyclicClasses()) {
+                int size = cyclicClass.size();
+                if (cyclicClassesCount.containsKey(size)) {
+                    cyclicClassesCount.put(size, cyclicClassesCount.get(size) + 1);
                 } else {
-                    cyclicType.append(String.format("%sy^%s + ", classCount.getValue(), classCount.getKey()));
+                    cyclicClassesCount.put(size, 1);
                 }
             }
+            for (Map.Entry<Integer, Integer> classCount : cyclicClassesCount.entrySet()) {
+                if (classCount.getKey() == 1) {
+                    cyclicType.append(String.format("%sy + ", classCount.getValue()));
+                } else {
+                    if (classCount.getValue() == 1) {
+                        cyclicType.append(String.format("y^%s + ", classCount.getKey()));
+                    } else {
+                        cyclicType.append(String.format("%sy^%s + ", classCount.getValue(), classCount.getKey()));
+                    }
+                }
+            }
+            return String.valueOf(new StringBuilder(cyclicType.reverse().substring(3)).reverse());
         }
-        return String.valueOf(new StringBuilder(cyclicType.reverse().substring(3)).reverse());
+    }
+
+    private String getCyclicTypeForPrimeMod() {
+        return "";
+    }
+
+    private String getCyclicTypeForPrimaryMod() {
+        return "";
     }
 
     public int getI(int a) {
         return getSequence(getPeriod()).indexOf(a) + 1;
     }
 
-    public int getPrimaryPeriod() {
+    private int getPrimaryPeriod() {
         Polynomial fx = getCharacteristicPolynomial();
-        Map<Integer, Integer> primaryMembers = Field.getPrimaryMembers();
-        int p = primaryMembers.keySet().stream().findFirst().orElse(0);
-        int m = primaryMembers.get(p);
-        System.out.println("Дано кольцо Z(" + p + "^" + m + ")");
-        System.out.println("F(x) = " + fx + " над Z" + Field.mod);
-        int oldMod = Field.mod;
-        Field.mod = p;
+        int p = Field.fieldInfo.getP();
+        int n = Field.fieldInfo.getN();
+        System.out.println("Дано кольцо Z(" + p + "^" + n + ")");
+        System.out.println("F(x) = " + fx + " над Z" + Field.getMod());
+        int oldMod = Field.getMod();
+        Field.setMod(p);
         Polynomial reducedFx = new LRP(fx).getCharacteristicPolynomial();
-        System.out.println(reducedFx.isDecomposable() ? "Приводим" : "Неприводим");
         int e = reducedFx.getExp();
         System.out.println("Находим редукцию /F(x), взяв первоначальный F(x), приведя коэффициенты по модулю 'p'");
-        System.out.println("Редукция /F(x) = " + reducedFx + " над Z" + p);
+        System.out.print("Редукция /F(x) = " + reducedFx + " над Z" + p);
+        System.out.println(" - " + (reducedFx.isDecomposable() ? "Приводим" : "Неприводим"));
         System.out.println("exp /F(x) = " + e);
-        System.out.println("ЛРП редукции имеет " + (e == (Math.pow(Field.mod, this.characteristicPolynomial.getDegree()) - 1) ?
+        System.out.println("ЛРП редукции имеет " + (e == (Math.pow(Field.getMod(), this.characteristicPolynomial.getDegree()) - 1) ?
                 "максимальный период" : "не максимальный период"));
-        Field.mod = oldMod;
+        Field.setMod(oldMod);
         Polynomial highestPolynomial = Polynomial.getMonomialMinusOne(e);
         System.out.println();
-        System.out.println("Проверим, достигается ли равенство T(F(x)) = T(/F(x)) * p^m-1");
+        System.out.println("Проверим, достигается ли равенство T(F(x)) = T(/F(x)) * p^n-1");
         System.out.println();
         System.out.println("Разделим " + highestPolynomial + " на F(x) с остатком по модулю " + oldMod);
         Polynomial divide = highestPolynomial.divide(fx);
@@ -272,26 +283,30 @@ public class LRP extends Field implements Converter {
         if (divide.getRemainder().getDegree() == 0) {
             ux = new Polynomial(Collections.singletonList(divide.getRemainder().getLowestCoefficient() / p));
         } else {
-            ux = divide.getRemainder().divide(new Polynomial(Collections.singletonList(p)));
+            List<Integer> coefficients = new ArrayList<>(divide.getRemainder().getCoefficients());
+            for (int i = 0; i < coefficients.size(); i++) {
+                coefficients.set(i, coefficients.get(i) / p);
+            }
+            ux = new Polynomial(coefficients);
         }
         System.out.println(highestPolynomial + " = ( ... ) * ( ... ) + " + p + "(" + ux + ")");
-        System.out.println("u(x) = результат деления с остатком = " + ux);
+        System.out.println("u(x) = " + ux);
         System.out.println();
 
-        int tfx = e * (int) Math.pow(p, m - 1);
-        if ((p > 2) || ((p == 2) && (m == 2))) {
-            System.out.println("Сложилась ситуация, когда p > 2 или p = 2 и m = 2");
+        int tfx = e * (int) Math.pow(p, n - 1);
+        if ((p > 2) || ((p == 2) && (n == 2))) {
+            System.out.println("Сложилась ситуация, когда p > 2 или p = 2 и n = 2");
             System.out.println("Убедимся, что u(x) не равняется 0");
             if (!ux.isNull()) {
                 System.out.println("u(x) = " + ux + " не равно 0");
-                System.out.println("Тогда T(F(x)) = T(/F(x)) * p^m-1 = " + e + " * " + (int) Math.pow(p, m - 1) + " = " + tfx);
+                System.out.println("Тогда T(F(x)) = T(/F(x)) * p^n-1 = " + e + " * " + (int) Math.pow(p, n - 1) + " = " + tfx);
                 return tfx;
             } else {
                 System.out.println("u(x) = " + ux);
                 System.out.println("Равенство не достигается");
             }
-        } else if ((p == 2) && (m > 2)) {
-            System.out.println("Сложилась ситуация, когда p = 2 и m > 2");
+        } else if ((p == 2) && (n > 2)) {
+            System.out.println("Сложилась ситуация, когда p = 2 и n > 2");
             System.out.println("Убедимся, что u(x)^2 + u(x) не сравнимо с 0 по модулю (/F(x))");
             Polynomial ux2 = ux.multiply(ux);
             Polynomial sumUx = ux2.sum(ux);
@@ -299,13 +314,14 @@ public class LRP extends Field implements Converter {
             Polynomial divideRes = sumUx.divide(reducedFx);
             System.out.println(sumUx + " cравнимо с " + divideRes.getRemainder() + " по модулю (" + reducedFx + ")");
             if (!divideRes.getRemainder().isNull()) {
-                System.out.println("Тогда T(F(x)) = T(/F(x)) * p^m-1 = " + e + " * " + (int) Math.pow(p, m - 1) + " = " + tfx);
+                System.out.println("Тогда T(F(x)) = T(/F(x)) * p^n-1 = " + e + " * " + (int) Math.pow(p, n - 1) + " = " + tfx);
                 return tfx;
             } else {
                 System.out.println("Равенство не достигается");
             }
         }
         if (ux.isNull()) {
+            System.out.println("Тогда новый T(x) = exp /F(x) * p = " + (e * p));
             return e * p;
         } else {
             int newExp = ux.getExp();
@@ -314,6 +330,26 @@ public class LRP extends Field implements Converter {
             System.out.println("Тогда новый T(x) = " + e);
             return e;
         }
+    }
+
+    private int getComplexPeriod() {
+        System.out.print("Z[x] не является простым. Рассмотрим композицию: ");
+        List<Integer> primeMembers = Field.getPrimeMembers();
+        System.out.println("Z" + Field.getMod() + " = " +
+                primeMembers.toString().replace("[", "Z").replace("]", "")
+                        .replace(" ", "Z").replace(",", " + "));
+        System.out.println();
+        List<Integer> compositionOfPeriods = new ArrayList<>();
+        for (int i = 0; i < primeMembers.size(); i++) {
+            Field.setMod(primeMembers.get(i));
+            LRP newLrp = new LRP(new RecurrentRelation(recurrentRelation.getCoefficients()), getInitialVector());
+            System.out.println("F" + i + "(x) = " + newLrp.getCharacteristicPolynomial() + " (mod " + Field.getMod() + ")");
+            System.out.println("T" + i + "(x) = " + newLrp.getPeriod());
+            System.out.println();
+            compositionOfPeriods.add(newLrp.getPeriod());
+        }
+        System.out.println("Значит пероид будет равен = " + compositionOfPeriods);
+        return LeastCommonMultiple.get(compositionOfPeriods.get(0), compositionOfPeriods.get(1));
     }
 
     private List<Integer> getEmptyList(int size) {

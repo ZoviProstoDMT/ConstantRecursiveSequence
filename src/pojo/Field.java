@@ -5,7 +5,34 @@ import pojo.polynomial.Polynomial;
 import java.util.*;
 
 public class Field {
-    public static int mod;
+
+    private static final Map<Integer, FieldInfo> allFields = new HashMap<>();
+    public static FieldInfo fieldInfo;
+    private static int mod;
+
+    public static int getMod() {
+        return mod;
+    }
+
+    public static void setMod(int mod) {
+        Field.mod = mod;
+        if (allFields.containsKey(mod)) {
+            Field.fieldInfo = allFields.get(mod);
+        } else {
+            boolean isPrime = isModPrime();
+            boolean isPrimary = !isPrime && isModPrimary();
+            FieldInfo fieldInfo = new FieldInfo(isPrime, isPrimary);
+            if (isPrimary) {
+                Map<Integer, Integer> primaryMembers = getPrimaryMembers();
+                int p = primaryMembers.keySet().stream().findFirst().orElse(0);
+                int n = primaryMembers.values().stream().findFirst().orElse(0);
+                fieldInfo.setP(p);
+                fieldInfo.setN(n);
+            }
+            Field.fieldInfo = fieldInfo;
+            Field.allFields.put(mod, fieldInfo);
+        }
+    }
 
     public static List<Integer> normalizeCoefficients(List<Integer> coefficients) {
         ArrayList<Integer> result = new ArrayList<>();
@@ -74,6 +101,10 @@ public class Field {
         return true;
     }
 
+    public static boolean isModPrimary() {
+        return getPrimaryMembers().values().stream().anyMatch(integer -> integer > 1);
+    }
+
     public static List<Integer> getPrimeMembers() {
         List<Integer> members = new ArrayList<>();
         int initialInt = mod;
@@ -89,11 +120,72 @@ public class Field {
         return members;
     }
 
-    public static Map<Integer, Integer> getPrimaryMembers() {
+    private static Map<Integer, Integer> getPrimaryMembers() {
         Map<Integer, Integer> result = new HashMap<>();
         for (Integer primeMember : getPrimeMembers()) {
             result.compute(primeMember, (key, value) -> value == null ? 1 : ++value);
         }
         return result;
+    }
+}
+
+class FieldInfo {
+    private boolean isPrime;
+    private boolean isPrimary;
+    private int p;
+    private int n;
+
+    public FieldInfo(boolean isPrime, boolean isPrimary, int p, int n) {
+        this.isPrime = isPrime;
+        this.isPrimary = isPrimary;
+        this.p = p;
+        this.n = n;
+    }
+
+    public FieldInfo(boolean isPrime, boolean isPrimary) {
+        this.isPrime = isPrime;
+        this.isPrimary = isPrimary;
+    }
+
+    public boolean isPrime() {
+        return isPrime;
+    }
+
+    public void setPrime(boolean prime) {
+        isPrime = prime;
+    }
+
+    public boolean isPrimary() {
+        return isPrimary;
+    }
+
+    public void setPrimary(boolean primary) {
+        isPrimary = primary;
+    }
+
+    public int getP() {
+        return p;
+    }
+
+    public void setP(int p) {
+        this.p = p;
+    }
+
+    public int getN() {
+        return n;
+    }
+
+    public void setN(int n) {
+        this.n = n;
+    }
+
+    @Override
+    public String toString() {
+        return "FieldInfo{" +
+                "isPrime=" + isPrime +
+                ", isPrimary=" + isPrimary +
+                ", p=" + p +
+                ", n=" + n +
+                '}';
     }
 }
