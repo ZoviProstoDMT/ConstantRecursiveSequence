@@ -1,4 +1,8 @@
-import pojo.*;
+import pojo.Field;
+import pojo.GreatestCommonDivisor;
+import pojo.LRP;
+import pojo.RecurrentRelation;
+import pojo.polynomial.Polynomial;
 
 import java.util.Arrays;
 import java.util.List;
@@ -11,10 +15,10 @@ public class CalculateHelper {
     }
 
     private static void showSimpleDemo() {
-        Field.mod = 3;
-        RecurrentRelation recurrentRelation = new RecurrentRelation(Arrays.asList(-1, -1, -1));
-        LRP lrp = new LRP(recurrentRelation, Arrays.asList(1, 1, 1));
-        showInformationAbout(lrp);
+        Field.mod = 8;
+        LRP lrp = new LRP(new Polynomial(Arrays.asList(2, 2, 1)));
+        lrp.getPrimaryPeriod();
+//        showInformationAbout(lrp);
     }
 
     private static void showInformationAbout(LRP lrp) {
@@ -26,7 +30,9 @@ public class CalculateHelper {
         System.out.println(!characteristicPolynomial.isDecomposable() ? "Неприводимый" :
                 "Приводимый, раскладывается на " + lrp.getDecompositionOfCharacteristicPolynomial());
         if (characteristicPolynomial.isDecomposable()) {
-
+            lrp.getDecompositionOfCharacteristicPolynomial().getDecompositionMap().forEach(
+                    (polynomial, degree) -> showInformationAbout(new LRP(polynomial, lrp.getInitialVector()))
+            );
         }
         Polynomial generator = lrp.getGenerator();
         System.out.println("Период T(x): " + lrp.getPeriod());

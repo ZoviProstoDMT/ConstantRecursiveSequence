@@ -1,7 +1,7 @@
 package helper;
 
 import pojo.Field;
-import pojo.Polynomial;
+import pojo.polynomial.Polynomial;
 import pojo.RecurrentRelation;
 
 import java.util.ArrayList;

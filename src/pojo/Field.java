@@ -1,9 +1,8 @@
 package pojo;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import pojo.polynomial.Polynomial;
+
+import java.util.*;
 
 public class Field {
     public static int mod;
@@ -88,5 +87,13 @@ public class Field {
             }
         }
         return members;
+    }
+
+    public static Map<Integer, Integer> getPrimaryMembers() {
+        Map<Integer, Integer> result = new HashMap<>();
+        for (Integer primeMember : getPrimeMembers()) {
+            result.compute(primeMember, (key, value) -> value == null ? 1 : ++value);
+        }
+        return result;
     }
 }

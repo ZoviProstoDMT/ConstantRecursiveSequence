@@ -1,5 +1,7 @@
 package pojo;
 
+import pojo.polynomial.Polynomial;
+
 import java.util.Collections;
 
 public class GreatestCommonDivisor {

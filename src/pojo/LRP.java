@@ -1,11 +1,10 @@
 package pojo;
 
 import helper.Converter;
+import pojo.polynomial.DecompositionOfPolynomial;
+import pojo.polynomial.Polynomial;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class LRP extends Field implements Converter {
 
@@ -29,6 +28,12 @@ public class LRP extends Field implements Converter {
         recurrentRelation = convertFrom(characteristicPolynomial);
     }
 
+    public LRP(Polynomial characteristicPolynomial) {
+        this.characteristicPolynomial = new Polynomial(characteristicPolynomial.getCoefficients());
+        this.initialVector = getImpulseVector();
+        recurrentRelation = convertFrom(characteristicPolynomial);
+    }
+
     public List<Integer> getInitialVector() {
         return initialVector;
     }
@@ -42,9 +47,16 @@ public class LRP extends Field implements Converter {
     }
 
     public LRP getImpulse() {
-        List<Integer> vector = getEmptyList(recurrentRelation.getDegree());
+        return new LRP(recurrentRelation, getImpulseVector());
+    }
+
+    private List<Integer> getImpulseVector() {
+        if (characteristicPolynomial.getDegree() == 0) {
+            return characteristicPolynomial.getCoefficients();
+        }
+        List<Integer> vector = getEmptyList(characteristicPolynomial.getDegree());
         vector.set(vector.size() - 1, 1);
-        return new LRP(recurrentRelation, vector);
+        return vector;
     }
 
     private List<Integer> calculateSequence(int numberOfMembers) {
@@ -229,6 +241,79 @@ public class LRP extends Field implements Converter {
 
     public int getI(int a) {
         return getSequence(getPeriod()).indexOf(a) + 1;
+    }
+
+    public int getPrimaryPeriod() {
+        Polynomial fx = getCharacteristicPolynomial();
+        Map<Integer, Integer> primaryMembers = Field.getPrimaryMembers();
+        int p = primaryMembers.keySet().stream().findFirst().orElse(0);
+        int m = primaryMembers.get(p);
+        System.out.println("Дано кольцо Z(" + p + "^" + m + ")");
+        System.out.println("F(x) = " + fx + " над Z" + Field.mod);
+        int oldMod = Field.mod;
+        Field.mod = p;
+        Polynomial reducedFx = new LRP(fx).getCharacteristicPolynomial();
+        System.out.println(reducedFx.isDecomposable() ? "Приводим" : "Неприводим");
+        int e = reducedFx.getExp();
+        System.out.println("Находим редукцию /F(x), взяв первоначальный F(x), приведя коэффициенты по модулю 'p'");
+        System.out.println("Редукция /F(x) = " + reducedFx + " над Z" + p);
+        System.out.println("exp /F(x) = " + e);
+        System.out.println("ЛРП редукции имеет " + (e == (Math.pow(Field.mod, this.characteristicPolynomial.getDegree()) - 1) ?
+                "максимальный период" : "не максимальный период"));
+        Field.mod = oldMod;
+        Polynomial highestPolynomial = Polynomial.getMonomialMinusOne(e);
+        System.out.println();
+        System.out.println("Проверим, достигается ли равенство T(F(x)) = T(/F(x)) * p^m-1");
+        System.out.println();
+        System.out.println("Разделим " + highestPolynomial + " на F(x) с остатком по модулю " + oldMod);
+        Polynomial divide = highestPolynomial.divide(fx);
+        System.out.println(highestPolynomial + " = (" + fx + ") * (" + divide + ") + (" + divide.getRemainder() + ")");
+        Polynomial ux;
+        if (divide.getRemainder().getDegree() == 0) {
+            ux = new Polynomial(Collections.singletonList(divide.getRemainder().getLowestCoefficient() / p));
+        } else {
+            ux = divide.getRemainder().divide(new Polynomial(Collections.singletonList(p)));
+        }
+        System.out.println(highestPolynomial + " = ( ... ) * ( ... ) + " + p + "(" + ux + ")");
+        System.out.println("u(x) = результат деления с остатком = " + ux);
+        System.out.println();
+
+        int tfx = e * (int) Math.pow(p, m - 1);
+        if ((p > 2) || ((p == 2) && (m == 2))) {
+            System.out.println("Сложилась ситуация, когда p > 2 или p = 2 и m = 2");
+            System.out.println("Убедимся, что u(x) не равняется 0");
+            if (!ux.isNull()) {
+                System.out.println("u(x) = " + ux + " не равно 0");
+                System.out.println("Тогда T(F(x)) = T(/F(x)) * p^m-1 = " + e + " * " + (int) Math.pow(p, m - 1) + " = " + tfx);
+                return tfx;
+            } else {
+                System.out.println("u(x) = " + ux);
+                System.out.println("Равенство не достигается");
+            }
+        } else if ((p == 2) && (m > 2)) {
+            System.out.println("Сложилась ситуация, когда p = 2 и m > 2");
+            System.out.println("Убедимся, что u(x)^2 + u(x) не сравнимо с 0 по модулю (/F(x))");
+            Polynomial ux2 = ux.multiply(ux);
+            Polynomial sumUx = ux2.sum(ux);
+            System.out.println("(" + ux2 + ") + (" + ux + ") = " + sumUx);
+            Polynomial divideRes = sumUx.divide(reducedFx);
+            System.out.println(sumUx + " cравнимо с " + divideRes.getRemainder() + " по модулю (" + reducedFx + ")");
+            if (!divideRes.getRemainder().isNull()) {
+                System.out.println("Тогда T(F(x)) = T(/F(x)) * p^m-1 = " + e + " * " + (int) Math.pow(p, m - 1) + " = " + tfx);
+                return tfx;
+            } else {
+                System.out.println("Равенство не достигается");
+            }
+        }
+        if (ux.isNull()) {
+            return e * p;
+        } else {
+            int newExp = ux.getExp();
+            System.out.println("exp " + ux + " = " + newExp);
+            e *= newExp;
+            System.out.println("Тогда новый T(x) = " + e);
+            return e;
+        }
     }
 
     private List<Integer> getEmptyList(int size) {

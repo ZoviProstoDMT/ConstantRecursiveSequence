@@ -1,14 +1,16 @@
-package pojo;
+package pojo.polynomial;
 
 import helper.Converter;
 import org.jetbrains.annotations.Nullable;
+import pojo.Field;
+import pojo.LeastCommonMultiple;
 
 import java.util.*;
 
 public class Polynomial extends Field implements Converter {
 
     DecompositionOfPolynomial decomposeOfPolynomial;
-    private final List<Integer> coefficients;
+    private List<Integer> coefficients;
     private Polynomial remainder;
 
     public Polynomial(List<Integer> coefficients) {
@@ -18,6 +20,21 @@ public class Polynomial extends Field implements Converter {
     public Polynomial(List<Integer> coefficients, Polynomial remainder) {
         this.coefficients = convertToField(coefficients);
         this.remainder = remainder;
+    }
+
+    public static Polynomial getMonomialMinusOne(int degree) {
+        Polynomial monomial = getMonomial(degree);
+        monomial.getCoefficients().set(0, -1);
+        return monomial;
+    }
+
+    public static Polynomial getMonomial(int degree) {
+        List<Integer> list = new ArrayList<>();
+        for (int i = 0; i < degree; i++) {
+            list.add(0);
+        }
+        list.add(1);
+        return new Polynomial(list);
     }
 
     public List<Integer> getCoefficients() {
@@ -40,12 +57,17 @@ public class Polynomial extends Field implements Converter {
         return coefficients.get(coefficients.size() - 1);
     }
 
+    public int getLowestCoefficient() {
+        return coefficients.get(0);
+    }
+
     public boolean isDecomposable() {
         return getDecomposeOfPolynomial().size() > 1;
     }
 
     public DecompositionOfPolynomial getDecomposeOfPolynomial() {
         if (decomposeOfPolynomial == null) {
+            decomposeOfPolynomial = new DecompositionOfPolynomial();
             Polynomial minimalDecomposeMember = getMinimalDecomposeMember();
             if (minimalDecomposeMember == null) {
                 decomposeOfPolynomial.put(this, 1);
@@ -83,6 +105,9 @@ public class Polynomial extends Field implements Converter {
     }
 
     public Polynomial divide(Polynomial polynomial) {
+        if (this.lessThan(polynomial)) {
+            return getNullPolynomial();
+        }
         if (polynomial.getDegree() == 0) {
             this.setRemainder(new Polynomial(Collections.singletonList(0)));
             switch (polynomial.getCoefficients().get(0)) {
@@ -177,6 +202,10 @@ public class Polynomial extends Field implements Converter {
         return new Polynomial(coefficients, remainder);
     }
 
+    public boolean isNull() {
+        return getCoefficients().stream().noneMatch(coefficient -> coefficient != 0);
+    }
+
     private List<Integer> getEmptyList(int size) {
         List<Integer> list = new ArrayList<>();
         for (int i = 0; i < size; i++) {
@@ -231,7 +260,7 @@ public class Polynomial extends Field implements Converter {
                 return i;
             }
         }
-        return 999999999;
+        throw new RuntimeException("There are no reverse number for " + number + " in Z" + mod);
     }
 
     private List<Integer> convertToField(List<Integer> coefficients) {
@@ -270,11 +299,9 @@ public class Polynomial extends Field implements Converter {
             while (true) {
                 Polynomial divideRes = temp.divide(minimalPolynomial);
                 if (divideRes.getRemainder().equals(new Polynomial(Collections.singletonList(0)))) {
-                    if (!decompositionOfCharacteristicPolynomial.containsKey(minimalPolynomial)) {
-                        decompositionOfCharacteristicPolynomial.put(minimalPolynomial, 1);
-                    } else {
-                        decompositionOfCharacteristicPolynomial.put(minimalPolynomial,
-                                decompositionOfCharacteristicPolynomial.get(minimalPolynomial) + 1);
+                    decompositionOfCharacteristicPolynomial.compute(minimalPolynomial, (polynomial, degree) -> degree == null ? 1 : degree + 1);
+                    if (divideRes.getDegree() == 0 && divideRes.getLowestCoefficient() == 1) {
+                        break;
                     }
                     temp = divideRes;
                 } else {
@@ -288,9 +315,30 @@ public class Polynomial extends Field implements Converter {
         return new DecompositionOfPolynomial(decompositionOfCharacteristicPolynomial);
     }
 
+    public boolean lessThan(Polynomial p) {
+        if (getDegree() == p.getDegree()) {
+            List<Integer> coefficientsA = getCoefficients();
+            List<Integer> coefficientsB = p.getCoefficients();
+            for (int i = coefficientsA.size() - 1; i >= 0; i--) {
+                if (!Objects.equals(coefficientsA.get(i), coefficientsB.get(i))) {
+                    return coefficientsA.get(i) < coefficientsB.get(i);
+                }
+            }
+        } else {
+            return getDegree() <= p.getDegree();
+        }
+        return false;
+    }
+
     public int getExp() {
         if (!isReversible()) {
-            throw new RuntimeException("Cannot get exponent from non reversible polynomial - " + this);
+            int exp = 1;
+            for (Map.Entry<Polynomial, Integer> member : getDecomposeOfPolynomial().getDecompositionMap().entrySet()) {
+                Polynomial polynomial = member.getKey();
+                exp = LeastCommonMultiple.get(exp, polynomial.getExp());
+            }
+//            throw new RuntimeException("Cannot get exponent from non reversible polynomial - " + this);
+            return exp;
         }
         int degree = coefficients.size() - 1;
         int startDegree = coefficients.size() - 1;
@@ -366,37 +414,5 @@ public class Polynomial extends Field implements Converter {
             }
         }
         return String.valueOf(result).isEmpty() ? "0" : String.valueOf(result);
-    }
-}
-
-class DecompositionOfPolynomial {
-    Map<Polynomial, Integer> decomposeOfPolynomial;
-
-    public DecompositionOfPolynomial(Map<Polynomial, Integer> decomposeOfPolynomial) {
-        this.decomposeOfPolynomial = decomposeOfPolynomial;
-    }
-
-    public int size() {
-        return decomposeOfPolynomial.size();
-    }
-
-    public void put(Polynomial polynomial, int degree) {
-        if (decomposeOfPolynomial == null) {
-            decomposeOfPolynomial = new HashMap<>();
-        }
-        decomposeOfPolynomial.put(polynomial, degree);
-    }
-
-    @Override
-    public String toString() {
-        StringBuilder sb = new StringBuilder();
-        decomposeOfPolynomial.forEach((polynomial, degree) -> {
-            if (degree > 1) {
-                sb.append("(").append(polynomial).append(")^").append(degree);
-            } else {
-                sb.append("(").append(polynomial).append(")");
-            }
-        });
-        return new String(sb);
     }
 }

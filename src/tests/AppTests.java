@@ -2,6 +2,7 @@ package tests;
 
 import helper.Converter;
 import pojo.*;
+import pojo.polynomial.Polynomial;
 
 import java.util.Arrays;
 import java.util.Collections;
