@@ -21,14 +21,14 @@ public class Field {
         } else {
             boolean isPrime = isModPrime();
             boolean isPrimary = !isPrime && isModPrimary();
-            FieldInfo fieldInfo = new FieldInfo(isPrime, isPrimary);
+            int p = 0;
+            int n = 0;
             if (isPrimary) {
                 Map<Integer, Integer> primaryMembers = getPrimaryMembers();
-                int p = primaryMembers.keySet().stream().findFirst().orElse(0);
-                int n = primaryMembers.values().stream().findFirst().orElse(0);
-                fieldInfo.setP(p);
-                fieldInfo.setN(n);
+                p = primaryMembers.keySet().stream().findFirst().orElse(0);
+                n = primaryMembers.values().stream().findFirst().orElse(0);
             }
+            FieldInfo fieldInfo = new FieldInfo(isPrime, isPrimary, p, n);
             Field.fieldInfo = fieldInfo;
             Field.allFields.put(mod, fieldInfo);
         }
@@ -91,7 +91,7 @@ public class Field {
         return vector;
     }
 
-    public static boolean isModPrime() {
+    private static boolean isModPrime() {
         double halfRange = Math.sqrt(mod);
         for (int i = 2; i <= halfRange; i++) {
             if (mod % i == 0) {
@@ -101,7 +101,7 @@ public class Field {
         return true;
     }
 
-    public static boolean isModPrimary() {
+    private static boolean isModPrimary() {
         return getPrimaryMembers().values().stream().anyMatch(integer -> integer > 1);
     }
 
@@ -130,10 +130,10 @@ public class Field {
 }
 
 class FieldInfo {
-    private boolean isPrime;
-    private boolean isPrimary;
-    private int p;
-    private int n;
+    private final boolean isPrime;
+    private final boolean isPrimary;
+    private final int p;
+    private final int n;
 
     public FieldInfo(boolean isPrime, boolean isPrimary, int p, int n) {
         this.isPrime = isPrime;
@@ -142,41 +142,20 @@ class FieldInfo {
         this.n = n;
     }
 
-    public FieldInfo(boolean isPrime, boolean isPrimary) {
-        this.isPrime = isPrime;
-        this.isPrimary = isPrimary;
-    }
-
     public boolean isPrime() {
         return isPrime;
-    }
-
-    public void setPrime(boolean prime) {
-        isPrime = prime;
     }
 
     public boolean isPrimary() {
         return isPrimary;
     }
 
-    public void setPrimary(boolean primary) {
-        isPrimary = primary;
-    }
-
     public int getP() {
         return p;
     }
 
-    public void setP(int p) {
-        this.p = p;
-    }
-
     public int getN() {
         return n;
-    }
-
-    public void setN(int n) {
-        this.n = n;
     }
 
     @Override

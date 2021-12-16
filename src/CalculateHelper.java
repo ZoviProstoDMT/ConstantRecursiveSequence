@@ -14,8 +14,8 @@ public class CalculateHelper {
     }
 
     private static void showSimpleDemo() {
-        Field.setMod(8);
-        LRP lrp = new LRP(new Polynomial(Arrays.asList(1, 0, 1, 1)));
+        Field.setMod(2);
+        LRP lrp = new LRP(new Polynomial(Arrays.asList(1, 1, 1)));
         showInformationAbout(lrp);
     }
 

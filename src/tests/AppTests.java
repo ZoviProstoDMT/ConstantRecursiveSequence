@@ -202,10 +202,9 @@ public class AppTests extends AbstractTest implements Converter {
     private void polynomialCyclicTypeTest() {
         startTest();
 
-//        todo Добавить вычисление циклического класса для примарных и простых колец
-//        Field.setMod(4);
-//        LRP lrp1 = new LRP(new RecurrentRelation(Collections.singletonList(3)), Collections.singletonList(1));
-//        result = lrp1.getCyclicType().equals("2y + y^2");
+        Field.setMod(4);
+        LRP lrp1 = new LRP(new RecurrentRelation(Collections.singletonList(3)), Collections.singletonList(1));
+        result = lrp1.getCyclicType().equals("2y + y^2");
 
 /*        todo Починить нахождение экспоненты для нереверсивного полинома(напр.X ^ 3 + X ^ 2 + X)
         Field.setMod(2);
