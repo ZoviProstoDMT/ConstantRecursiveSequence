@@ -33,7 +33,8 @@ public class CyclicType implements Converter {
                 if (b.get(j) == 0) {
                     continue;
                 }
-                resCoefficients.set(LeastCommonMultiple.get(i, j), a.get(i) * b.get(j));
+                resCoefficients.set(LeastCommonMultiple.get(i, j),
+                        GreatestCommonDivisor.get(i, j) * a.get(i) * b.get(j));
             }
         }
         return new CyclicType(new Polynomial(resCoefficients, false));
@@ -44,11 +45,19 @@ public class CyclicType implements Converter {
     }
 
     private void calculateCyclicType(LRP lrp) {
-        List<List<LRP>> cyclicClasses = lrp.getCyclicClasses();
-        List<Integer> cyclicClassCoefficients = getListWithNulls(cyclicClasses.stream().mapToInt(List::size).max().orElse(0) + 1);
-        for (List<LRP> cyclicClass : cyclicClasses) {
-            int powerOfY = cyclicClass.size();
-            cyclicClassCoefficients.set(powerOfY, cyclicClassCoefficients.get(powerOfY) + 1);
+        List<Integer> cyclicClassCoefficients;
+        if (lrp.isPeriodLargest()) {
+            int period = lrp.getPeriod();
+            cyclicClassCoefficients = getListWithNulls(period + 1);
+            cyclicClassCoefficients.set(1, 1);
+            cyclicClassCoefficients.set(period, 1);
+        } else {
+            List<List<LRP>> cyclicClasses = lrp.getCyclicClasses();
+            cyclicClassCoefficients = getListWithNulls(cyclicClasses.stream().mapToInt(List::size).max().orElse(0) + 1);
+            for (List<LRP> cyclicClass : cyclicClasses) {
+                int powerOfY = cyclicClass.size();
+                cyclicClassCoefficients.set(powerOfY, cyclicClassCoefficients.get(powerOfY) + 1);
+            }
         }
         polynomial = new Polynomial(cyclicClassCoefficients, false);
     }

@@ -4,6 +4,7 @@ import pojo.GreatestCommonDivisor;
 import pojo.LRP;
 import pojo.polynomial.Polynomial;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -14,11 +15,11 @@ public class CalculateHelper {
     }
 
     private static void showSimpleDemo() {
-        Field.setMod(997);
-        Polynomial a = new Polynomial(0, 1, 0, 1);
-        Polynomial b = new Polynomial(0, 1, 0, 0, 0, 3);
-        System.out.println(CyclicType.compositionOf(a, b));
-//        showInformationAbout(new LRP(new Polynomial(2, 3, 1)));
+        Field.setMod(9997);
+        Polynomial a = Polynomial.getMonomial(3124).sum(new Polynomial(0, 1));
+        Polynomial b = (Polynomial.getMonomial(78).multiply(new Polynomial(2))).sum(Polynomial.getMonomial(26).multiply(new Polynomial(3))).sum(new Polynomial(Arrays.asList(0, 3, 0, 2), false));
+        System.out.println(CyclicType.compositionOf(b, a));
+//        showInformationAbout(new LRP(new Polynomial(1, 1, 1)));
     }
 
     private static void showInformationAbout(LRP lrp) {

@@ -27,7 +27,11 @@ public class Polynomial extends Field implements Converter {
     }
 
     public Polynomial(List<Integer> coefficients, boolean isConvertedToField) {
-        this.coefficients = trimCoefficients(coefficients);
+        if (isConvertedToField) {
+            this.coefficients = trimCoefficients(convertToField(coefficients));
+        } else {
+            this.coefficients = trimCoefficients(coefficients);
+        }
     }
 
     public static Polynomial getMonomialMinusOne(int degree) {
@@ -385,7 +389,7 @@ public class Polynomial extends Field implements Converter {
             } else {
                 result.append(coefficients.get(coefficients.size() - 1) == -1 ? "-" : "");
             }
-            result.append("X");
+            result.append("x");
             result.append(coefficients.size() - 1 == 1 ? "" : "^" + (coefficients.size() - 1));
         }
         for (int i = coefficients.size() - 2; i >= 0; i--) {
@@ -396,9 +400,9 @@ public class Polynomial extends Field implements Converter {
                         result.append(coefficients.get(i));
                     } else {
                         if (coefficients.get(i) == 1 || coefficients.get(i) == -1) {
-                            result.append("X");
+                            result.append("x");
                         } else {
-                            result.append(coefficients.get(i)).append("X");
+                            result.append(coefficients.get(i)).append("x");
                         }
                         result.append(i == 1 ? "" : "^" + i);
                     }
@@ -408,9 +412,9 @@ public class Polynomial extends Field implements Converter {
                         result.append(coefficients.get(i) * -1);
                     } else {
                         if (coefficients.get(i) == 1 || coefficients.get(i) == -1) {
-                            result.append("X");
+                            result.append("x");
                         } else {
-                            result.append(coefficients.get(i) * -1).append("X");
+                            result.append(coefficients.get(i) * -1).append("x");
                         }
                         result.append(i == 1 ? "" : "^" + i);
                     }
