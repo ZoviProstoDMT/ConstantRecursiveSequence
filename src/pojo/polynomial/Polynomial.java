@@ -22,6 +22,14 @@ public class Polynomial extends Field implements Converter {
         this.remainder = remainder;
     }
 
+    public Polynomial(Integer... coefficients) {
+        this.coefficients = new ArrayList<>(Arrays.asList(coefficients));
+    }
+
+    public Polynomial(List<Integer> coefficients, boolean isConvertedToField) {
+        this.coefficients = trimCoefficients(coefficients);
+    }
+
     public static Polynomial getMonomialMinusOne(int degree) {
         Polynomial monomial = getMonomial(degree);
         monomial.getCoefficients().set(0, -1);
@@ -168,7 +176,7 @@ public class Polynomial extends Field implements Converter {
             return this.revert();
         } else {
             List<Integer> coefficients = new ArrayList<>(this.coefficients);
-            List<Integer> newCoefficients = getEmptyList(coefficients.size() + degree);
+            List<Integer> newCoefficients = getListWithNulls(coefficients.size() + degree);
             for (int i = 0; i < coefficients.size(); i++) {
                 newCoefficients.set(i + degree, (coefficients.get(i) * coefficient) % Field.getMod());
             }
@@ -206,14 +214,6 @@ public class Polynomial extends Field implements Converter {
         return getCoefficients().stream().noneMatch(coefficient -> coefficient != 0);
     }
 
-    private List<Integer> getEmptyList(int size) {
-        List<Integer> list = new ArrayList<>();
-        for (int i = 0; i < size; i++) {
-            list.add(0);
-        }
-        return list;
-    }
-
     private Polynomial getMonomial(int degree, int coefficient) {
         List<Integer> list = new ArrayList<>();
         for (int i = 0; i < degree; i++) {
@@ -239,7 +239,7 @@ public class Polynomial extends Field implements Converter {
             return coefficients;
         }
         if (coefficients.stream().noneMatch(integer -> integer != 0)) {
-            return getEmptyList(1);
+            return getListWithNulls(1);
         }
         for (int i = coefficients.size() - 1; i >= 0; i--) {
             if (coefficients.get(i) == 0) {
@@ -298,9 +298,10 @@ public class Polynomial extends Field implements Converter {
             Polynomial temp = this;
             while (true) {
                 Polynomial divideRes = temp.divide(minimalPolynomial);
-                if (divideRes.getRemainder().equals(new Polynomial(Collections.singletonList(0)))) {
+                if (divideRes.getRemainder().isNull()) {
                     decompositionOfCharacteristicPolynomial.compute(minimalPolynomial, (polynomial, degree) -> degree == null ? 1 : degree + 1);
-                    if (divideRes.getDegree() == 0 && divideRes.getLowestCoefficient() == 1) {
+                    if (divideRes.getDegree() == minimalPolynomial.getDegree()) {
+                        decompositionOfCharacteristicPolynomial.compute(divideRes, (polynomial, degree) -> degree == null ? 1 : degree + 1);
                         break;
                     }
                     temp = divideRes;
@@ -341,7 +342,6 @@ public class Polynomial extends Field implements Converter {
                 int tempExp = polynomial.getExp();
                 exp = LeastCommonMultiple.get(exp, tempExp);
             }
-//            throw new RuntimeException("Cannot get exponent from non reversible polynomial - " + this);
             return exp;
         }
         int degree = coefficients.size() - 1;

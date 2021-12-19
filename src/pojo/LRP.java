@@ -4,7 +4,9 @@ import helper.Converter;
 import pojo.polynomial.DecompositionOfPolynomial;
 import pojo.polynomial.Polynomial;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 
 public class LRP extends Field implements Converter {
 
@@ -21,12 +23,6 @@ public class LRP extends Field implements Converter {
         this.recurrentRelation = recurrentRelation;
         this.initialVector = normalizeCoefficients(initialVector).subList(0, recurrentRelation.getDegree());
         characteristicPolynomial = convertFrom(recurrentRelation);
-    }
-
-    public LRP(Polynomial characteristicPolynomial, List<Integer> initialVector) {
-        this.characteristicPolynomial = characteristicPolynomial;
-        this.initialVector = initialVector;
-        recurrentRelation = convertFrom(characteristicPolynomial);
     }
 
     public LRP(Polynomial characteristicPolynomial) {
@@ -66,7 +62,7 @@ public class LRP extends Field implements Converter {
         if (characteristicPolynomial.getDegree() == 0) {
             return characteristicPolynomial.getCoefficients();
         }
-        List<Integer> vector = getEmptyList(characteristicPolynomial.getDegree());
+        List<Integer> vector = getListWithNulls(characteristicPolynomial.getDegree());
         vector.set(vector.size() - 1, 1);
         return vector;
     }
@@ -117,7 +113,7 @@ public class LRP extends Field implements Converter {
     }
 
     public List<Integer> multiply(Polynomial polynomial, int numberOfMembers) {
-        List<Integer> result = getEmptyList(numberOfMembers);
+        List<Integer> result = getListWithNulls(numberOfMembers);
         for (int i = 0; i < polynomial.getCoefficients().size(); i++) {
             LRP lrp = this.multiply(i, polynomial.getCoefficients().get(i));
             result = sum(result, lrp.getSequence(numberOfMembers));
@@ -135,12 +131,24 @@ public class LRP extends Field implements Converter {
     public int getPeriod() {
         int oldMod = Field.getMod();
         if (period == 0) {
-            if (Field.fieldInfo.isPrime()) {
-                period = getMinimalPolynomial().getExp();
-            } else if (Field.fieldInfo.isPrimary()) {
-                period = getPrimaryPeriod();
+            if (getCharacteristicPolynomial().isDecomposable()) {
+                period = 1;
+                List<Integer> tempPeriods = new ArrayList<>();
+                getCharacteristicPolynomial().getDecomposeOfPolynomial().getDecompositionMap().forEach(
+                        (polynomial, degree) -> tempPeriods.add(new LRP(polynomial).getPeriod())
+                );
+                for (Integer tempPeriod : tempPeriods) {
+                    period = LeastCommonMultiple.get(period, tempPeriod);
+                }
+                return period;
             } else {
-                period = getComplexPeriod();
+                if (Field.fieldInfo.isPrime()) {
+                    period = getMinimalPolynomial().getExp();
+                } else if (Field.fieldInfo.isPrimary()) {
+                    period = getPrimaryPeriod();
+                } else {
+                    period = getComplexPeriod();
+                }
             }
         }
         Field.setMod(oldMod);
@@ -158,7 +166,7 @@ public class LRP extends Field implements Converter {
     public Polynomial getGenerator() {
         if (generatorPolynomial == null) {
             int degree = recurrentRelation.getDegree();
-            List<Integer> coefficientsForPolynomial = getEmptyList(degree);
+            List<Integer> coefficientsForPolynomial = getListWithNulls(degree);
             List<Integer> f = recurrentRelation.getCoefficients();
             coefficientsForPolynomial.set(degree - 1, initialVector.get(0));
             for (int i = 1; i <= degree - 1; i++) {
@@ -211,45 +219,6 @@ public class LRP extends Field implements Converter {
             }
         }
         return cyclicClasses;
-    }
-
-    public String getCyclicType() {
-//        if (Field.fieldInfo.isPrime()) {
-//            return getCyclicTypeForPrimeMod();
-//        } else if (Field.fieldInfo.isPrimary()) {
-//            return getCyclicTypeForPrimaryMod();
-//        } else {
-        Map<Integer, Integer> cyclicClassesCount = new HashMap<>();
-        StringBuilder cyclicType = new StringBuilder();
-        for (List<LRP> cyclicClass : getCyclicClasses()) {
-            int size = cyclicClass.size();
-            if (cyclicClassesCount.containsKey(size)) {
-                cyclicClassesCount.put(size, cyclicClassesCount.get(size) + 1);
-            } else {
-                cyclicClassesCount.put(size, 1);
-            }
-        }
-            for (Map.Entry<Integer, Integer> classCount : cyclicClassesCount.entrySet()) {
-                if (classCount.getKey() == 1) {
-                    cyclicType.append(String.format("%sy + ", classCount.getValue()));
-                } else {
-                    if (classCount.getValue() == 1) {
-                        cyclicType.append(String.format("y^%s + ", classCount.getKey()));
-                    } else {
-                        cyclicType.append(String.format("%sy^%s + ", classCount.getValue(), classCount.getKey()));
-                    }
-                }
-            }
-            return String.valueOf(new StringBuilder(cyclicType.reverse().substring(3)).reverse());
-//        }
-    }
-
-    private String getCyclicTypeForPrimeMod() {
-        return "";
-    }
-
-    private String getCyclicTypeForPrimaryMod() {
-        return "";
     }
 
     public int getI(int a) {
@@ -353,12 +322,8 @@ public class LRP extends Field implements Converter {
         return LeastCommonMultiple.get(compositionOfPeriods.get(0), compositionOfPeriods.get(1));
     }
 
-    private List<Integer> getEmptyList(int size) {
-        List<Integer> list = new ArrayList<>();
-        for (int i = 0; i < size; i++) {
-            list.add(0);
-        }
-        return list;
+    public CyclicType getCyclicType() {
+        return new CyclicType(this);
     }
 
     public boolean equals(LRP lrp, int period) {
@@ -385,7 +350,6 @@ public class LRP extends Field implements Converter {
         String objSeq = lrp.getSequence(period + initialVector.size()).toString();
         return objSeq.contains(thisSeq);
     }
-
 
     @Override
     public int hashCode() {

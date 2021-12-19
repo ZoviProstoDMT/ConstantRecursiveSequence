@@ -1,9 +1,9 @@
+import pojo.CyclicType;
 import pojo.Field;
 import pojo.GreatestCommonDivisor;
 import pojo.LRP;
 import pojo.polynomial.Polynomial;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -14,9 +14,11 @@ public class CalculateHelper {
     }
 
     private static void showSimpleDemo() {
-        Field.setMod(2);
-        LRP lrp = new LRP(new Polynomial(Arrays.asList(1, 1, 1)));
-        showInformationAbout(lrp);
+        Field.setMod(997);
+        Polynomial a = new Polynomial(0, 1, 0, 1);
+        Polynomial b = new Polynomial(0, 1, 0, 0, 0, 3);
+        System.out.println(CyclicType.compositionOf(a, b));
+//        showInformationAbout(new LRP(new Polynomial(2, 3, 1)));
     }
 
     private static void showInformationAbout(LRP lrp) {
@@ -27,16 +29,11 @@ public class CalculateHelper {
                 (characteristicPolynomial.isReversible() ? "реверсивный" : "не реверсивный"));
         System.out.println(!characteristicPolynomial.isDecomposable() ? "Неприводимый" :
                 "Приводимый, раскладывается на " + lrp.getDecompositionOfCharacteristicPolynomial());
-        if (characteristicPolynomial.isDecomposable()) {
-            lrp.getDecompositionOfCharacteristicPolynomial().getDecompositionMap().forEach(
-                    (polynomial, degree) -> showInformationAbout(new LRP(polynomial, lrp.getInitialVector()))
-            );
-        }
         Polynomial generator = lrp.getGenerator();
         System.out.println("Период T(x): " + lrp.getPeriod());
         System.out.println("Данная ЛРП имеет " + (lrp.isPeriodLargest() ? "максимальный период" : "не максимальный период"));
-        System.out.println("Генератор G(x): " + generator);
-        System.out.println("НОД (F(x), G(x)): " + GreatestCommonDivisor.get(characteristicPolynomial, generator));
+        System.out.println("Генератор Ф(x): " + generator);
+        System.out.println("НОД (F(x), G (x)): " + GreatestCommonDivisor.get(characteristicPolynomial, generator));
         Polynomial minimalPolynomial = lrp.getMinimalPolynomial();
         System.out.println("Минимальный многочлен M(x): " + minimalPolynomial);
         System.out.println();
@@ -48,8 +45,7 @@ public class CalculateHelper {
                 List<LRP> cyclicClass = cyclicClasses.get(i);
                 System.out.println("[" + (i + 1) + "] " + cyclicClass);
             }
-            String cyclicType = lrp.getCyclicType();
-            System.out.println("Циклический тип: " + cyclicType);
+            System.out.println("Циклический тип: " + lrp.getCyclicType());
         } else {
             System.out.println("Невозможно получить информацию о циклическом типе, так как многочлен не реверсивный");
         }

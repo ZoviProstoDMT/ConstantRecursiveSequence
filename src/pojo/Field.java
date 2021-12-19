@@ -21,8 +21,8 @@ public class Field {
         } else {
             boolean isPrime = isModPrime();
             boolean isPrimary = !isPrime && isModPrimary();
-            int p = 0;
-            int n = 0;
+            int p = mod;
+            int n = 1;
             if (isPrimary) {
                 Map<Integer, Integer> primaryMembers = getPrimaryMembers();
                 p = primaryMembers.keySet().stream().findFirst().orElse(0);

@@ -204,12 +204,11 @@ public class AppTests extends AbstractTest implements Converter {
 
         Field.setMod(4);
         LRP lrp1 = new LRP(new RecurrentRelation(Collections.singletonList(3)), Collections.singletonList(1));
-        result = lrp1.getCyclicType().equals("2y + y^2");
+        result = lrp1.getCyclicType().toString().equals("2y + y^2");
 
-/*        todo Починить нахождение экспоненты для нереверсивного полинома(напр.X ^ 3 + X ^ 2 + X)
         Field.setMod(2);
-        LRP lrp2 = new LRP(new RecurrentRelation(Arrays.asList(1, 0, 1, 1, 1, 0)), Arrays.asList(1, 1, 1, 1, 1, 1));
-        result &= lrp2.getCyclicType(lrp2.getCyclicClasses()).equals("y + y^3 + 3y^5 + 3y^15");*/
+        LRP lrp2 = new LRP(new Polynomial(1, 0, 1, 1, 1, 0, 1));
+        result &= lrp2.getCyclicType().toString().equals("y + y^3 + 3y^5 + 3y^15");
 
         completeTest();
     }

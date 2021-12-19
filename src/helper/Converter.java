@@ -29,4 +29,12 @@ public interface Converter {
         return new RecurrentRelation(convertedCoefficients);
     }
 
+    default List<Integer> getListWithNulls(int size) {
+        List<Integer> list = new ArrayList<>();
+        for (int i = 0; i < size; i++) {
+            list.add(0);
+        }
+        return list;
+    }
+
 }
