@@ -3,14 +3,15 @@ package pojo;
 import helper.Converter;
 import pojo.polynomial.Polynomial;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class CyclicType implements Converter {
 
     private Polynomial polynomial;
 
-    public CyclicType(Polynomial polynomial) {
-        this.polynomial = polynomial;
+    private CyclicType(Polynomial cyclicType) {
+        this.polynomial = cyclicType;
     }
 
     public CyclicType(LRP lrp) {
@@ -45,21 +46,37 @@ public class CyclicType implements Converter {
     }
 
     private void calculateCyclicType(LRP lrp) {
-        List<Integer> cyclicClassCoefficients;
-        if (lrp.isPeriodLargest()) {
-            int period = lrp.getPeriod();
-            cyclicClassCoefficients = getListWithNulls(period + 1);
-            cyclicClassCoefficients.set(1, 1);
-            cyclicClassCoefficients.set(period, 1);
-        } else {
-            List<List<LRP>> cyclicClasses = lrp.getCyclicClasses();
-            cyclicClassCoefficients = getListWithNulls(cyclicClasses.stream().mapToInt(List::size).max().orElse(0) + 1);
-            for (List<LRP> cyclicClass : cyclicClasses) {
-                int powerOfY = cyclicClass.size();
-                cyclicClassCoefficients.set(powerOfY, cyclicClassCoefficients.get(powerOfY) + 1);
+        if (!lrp.getCharacteristicPolynomial().isDecomposable()) {
+            List<Integer> cyclicClassCoefficients;
+            if (lrp.isPeriodLargest()) {
+                int period = lrp.getPeriod();
+                cyclicClassCoefficients = getListWithNulls(period + 1);
+                cyclicClassCoefficients.set(1, 1);
+                cyclicClassCoefficients.set(period, 1);
+            } else {
+                List<List<LRP>> cyclicClasses = lrp.getCyclicClasses();
+                cyclicClassCoefficients = getListWithNulls(
+                        cyclicClasses.stream().mapToInt(List::size).max().orElse(0) + 1
+                );
+                for (List<LRP> cyclicClass : cyclicClasses) {
+                    int powerOfY = cyclicClass.size();
+                    cyclicClassCoefficients.set(powerOfY, cyclicClassCoefficients.get(powerOfY) + 1);
+                }
             }
+            polynomial = new Polynomial(cyclicClassCoefficients, false);
+        } else {
+            CyclicType result;
+            List<CyclicType> tempTypes = new ArrayList<>();
+            lrp.getCharacteristicPolynomial().getDecomposeOfPolynomial().getDecompositionMap().forEach(
+                    (polynomial, degree) -> tempTypes.add(new LRP(polynomial).getCyclicType())
+            );
+            result = tempTypes.get(0);
+            for (int i = 1; i < tempTypes.size(); i++) {
+                CyclicType tempType = tempTypes.get(i);
+                result = CyclicType.compositionOf(result, tempType);
+            }
+            polynomial = result.getPolynomial();
         }
-        polynomial = new Polynomial(cyclicClassCoefficients, false);
     }
 
     @Override

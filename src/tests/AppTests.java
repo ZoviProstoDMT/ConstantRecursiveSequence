@@ -55,21 +55,21 @@ public class AppTests extends AbstractTest implements Converter {
         Polynomial p11 = new LRP(r1, Arrays.asList(1, 1, 1, 1, 1, 1)).getCharacteristicPolynomial();
         Polynomial p1 = convertFrom(r1);
         result = r1.toString().equals("0C0 + 2C1 + 0C2 + 2C3 + 0C4 + 0C5 = C6") &&
-                p11.toString().equals("X^6 + X^3 + X") && p1.toString().equals("X^6 + X^3 + X");
+                p11.toString().equals("x^6 + x^3 + x") && p1.toString().equals("x^6 + x^3 + x");
 
         Field.setMod(7);
         RecurrentRelation r2 = new RecurrentRelation(Arrays.asList(6, 6, 0, 7));
         Polynomial p22 = new LRP(r2, Arrays.asList(0, 0, 7, 1)).getCharacteristicPolynomial();
         Polynomial p2 = convertFrom(r2);
         result &= r2.toString().equals("6C0 + 6C1 + 0C2 + 0C3 = C4") &&
-                p22.toString().equals("X^4 + X + 1") && p2.toString().equals("X^4 + X + 1");
+                p22.toString().equals("x^4 + x + 1") && p2.toString().equals("x^4 + x + 1");
 
         Field.setMod(4);
         RecurrentRelation r3 = new RecurrentRelation(Arrays.asList(3, 0, 4, 4, 3));
         Polynomial p33 = new LRP(r3, Arrays.asList(0, 0, 0, 4, 1)).getCharacteristicPolynomial();
         Polynomial p3 = convertFrom(r3);
         result &= r3.toString().equals("3C0 + 0C1 + 0C2 + 0C3 + 3C4 = C5") &&
-                p33.toString().equals("X^5 + X^4 + 1") && p3.toString().equals("X^5 + X^4 + 1");
+                p33.toString().equals("x^5 + x^4 + 1") && p3.toString().equals("x^5 + x^4 + 1");
 
         completeTest();
     }
@@ -141,14 +141,14 @@ public class AppTests extends AbstractTest implements Converter {
 
         Field.setMod(3);
         result = GreatestCommonDivisor.get(new Polynomial(Arrays.asList(0, 0, 1)),
-                new Polynomial(Arrays.asList(0, 1))).toString().equals("X");
+                new Polynomial(Arrays.asList(0, 1))).toString().equals("x");
 
         Field.setMod(2);
         result &= GreatestCommonDivisor.get(new Polynomial(Arrays.asList(1, 0, 1)),
-                new Polynomial(Arrays.asList(1, 1))).toString().equals("X + 1");
+                new Polynomial(Arrays.asList(1, 1))).toString().equals("x + 1");
 
         result &= GreatestCommonDivisor.get(new Polynomial(Arrays.asList(1, 0, 0, 1, 0)),
-                new Polynomial(Arrays.asList(1, 0, 1))).toString().equals("X + 1");
+                new Polynomial(Arrays.asList(1, 0, 1))).toString().equals("x + 1");
 
         Field.setMod(5);
         result &= GreatestCommonDivisor.get(new Polynomial(Arrays.asList(2, 2, 2, 3, 1)),

@@ -323,7 +323,32 @@ public class LRP extends Field implements Converter {
     }
 
     public CyclicType getCyclicType() {
-        return new CyclicType(this);
+        int oldMod = Field.getMod();
+        if (Field.fieldInfo.isPrime()) {
+            return new CyclicType(this);
+        } else if (Field.fieldInfo.isPrimary()) {
+            return new CyclicType(this);
+        } else {
+            CyclicType cyclicTypeResult;
+            List<CyclicType> tempTypes = new ArrayList<>();
+            List<Integer> primeMembers = Field.getPrimeMembers();
+            for (Integer primeMember : primeMembers) {
+                Field.setMod(primeMember);
+                LRP lrp = new LRP(getCharacteristicPolynomial());
+                System.out.println("В Z" + primeMember + " F(X) = " + lrp.getCharacteristicPolynomial() + " - " +
+                        (lrp.getCharacteristicPolynomial().isDecomposable() ? " Приводим " : "Неприводим"));
+                System.out.println("T(x) = " + lrp.getPeriod());
+                CyclicType primeCyclicType = new CyclicType(lrp);
+                tempTypes.add(primeCyclicType);
+                System.out.println("Циклический тип = " + primeCyclicType + "\n");
+            }
+            cyclicTypeResult = tempTypes.get(0);
+            for (CyclicType tempType : tempTypes) {
+                cyclicTypeResult = CyclicType.compositionOf(tempType, cyclicTypeResult);
+            }
+            Field.setMod(oldMod);
+            return cyclicTypeResult;
+        }
     }
 
     public boolean equals(LRP lrp, int period) {
