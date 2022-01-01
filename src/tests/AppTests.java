@@ -18,6 +18,7 @@ public class AppTests extends AbstractTest implements Converter {
     }
 
     private void run() {
+        mathOperationsTest();
         converterTest();
         generateToStringValuesTest();
         calculateGeneratorTest();
@@ -28,6 +29,34 @@ public class AppTests extends AbstractTest implements Converter {
         isDecomposableTest();
         getITest();
         polynomialCyclicTypeTest();
+    }
+
+    private void mathOperationsTest() {
+        startTest();
+
+        Field.setMod(3);
+        Polynomial p1 = new Polynomial(0, 1);
+        Polynomial p2 = new Polynomial(0, 1);
+
+        Polynomial sum = p1.sum(p2);
+        result &= sum.getCoefficients().equals(Arrays.asList(0, 2)) && p1.getCoefficients().equals(Arrays.asList(0, 1))
+                && p2.getCoefficients().equals(Arrays.asList(0, 1));
+
+        Polynomial subtract = p1.subtract(p2);
+        result &= subtract.isNull() && p1.getCoefficients().equals(Arrays.asList(0, 1))
+                && p2.getCoefficients().equals(Arrays.asList(0, 1));
+
+        Polynomial divide = p1.divide(p2);
+        result &= divide.getCoefficients().equals(Collections.singletonList(1)) && divide.getRemainder().isNull()
+                && p1.getCoefficients().equals(Arrays.asList(0, 1))
+                && p2.getCoefficients().equals(Arrays.asList(0, 1));
+
+        Polynomial multiply = p1.multiply(p2);
+        result &= multiply.getCoefficients().equals(Arrays.asList(0, 0, 1))
+                && p1.getCoefficients().equals(Arrays.asList(0, 1))
+                && p2.getCoefficients().equals(Arrays.asList(0, 1));
+
+        completeTest();
     }
 
     private void converterTest() {

@@ -46,13 +46,26 @@ public class CyclicType implements Converter {
     }
 
     private void calculateCyclicType(LRP lrp) {
+        int period = lrp.getPeriod();
+        List<Integer> cyclicClassCoefficients;
         if (!lrp.getCharacteristicPolynomial().isDecomposable()) {
-            List<Integer> cyclicClassCoefficients;
-            if (lrp.isPeriodLargest()) {
-                int period = lrp.getPeriod();
+            if (lrp.isPeriodLargest() && Field.fieldInfo.isPrime()) {
                 cyclicClassCoefficients = getListWithNulls(period + 1);
                 cyclicClassCoefficients.set(1, 1);
                 cyclicClassCoefficients.set(period, 1);
+                polynomial = new Polynomial(cyclicClassCoefficients, false);
+                return;
+            } else if (lrp.isPeriodLargest() && Field.fieldInfo.isPrimary()) {
+                int p = Field.getFieldInfo().getP();
+                int n = Field.getFieldInfo().getN();
+                int m = lrp.getCharacteristicPolynomial().getDegree();
+                cyclicClassCoefficients = getListWithNulls((int) ((Math.pow(p, m) - 1) * Math.pow(p, n - 1)) + 1);
+                cyclicClassCoefficients.set(1, 1);
+                for (int t = 0; t < n - 1; t++) {
+                    cyclicClassCoefficients.set((int) ((Math.pow(p, m) - 1) * Math.pow(p, t)), (int) Math.pow(p, (m - 1) * t));
+                }
+                polynomial = new Polynomial(cyclicClassCoefficients, false);
+                return;
             } else {
                 List<List<LRP>> cyclicClasses = lrp.getCyclicClasses();
                 cyclicClassCoefficients = getListWithNulls(

@@ -3,6 +3,7 @@ package pojo.polynomial;
 import helper.Converter;
 import org.jetbrains.annotations.Nullable;
 import pojo.Field;
+import pojo.GreatestCommonDivisor;
 import pojo.LeastCommonMultiple;
 
 import java.util.*;
@@ -10,7 +11,7 @@ import java.util.*;
 public class Polynomial extends Field implements Converter {
 
     private final List<Integer> coefficients;
-    DecompositionOfPolynomial decomposeOfPolynomial;
+    DecompositionOfPolynomial decomposeOfPolynomial = new DecompositionOfPolynomial();
     private Polynomial remainder;
 
     public Polynomial(List<Integer> coefficients) {
@@ -192,18 +193,17 @@ public class Polynomial extends Field implements Converter {
         return this.sum(polynomial.revert()).trimCoefficients().convertToField();
     }
 
-    public Polynomial sum(Polynomial polynomial) {
-        if (this.coefficients.size() > polynomial.getCoefficients().size()) {
-            for (int i = 0; i < polynomial.getCoefficients().size(); i++) {
-                this.coefficients.set(i, (polynomial.getCoefficients().get(i) + this.coefficients.get(i)) % Field.getMod());
-            }
-            return this;
-        } else {
-            for (int i = 0; i < this.coefficients.size(); i++) {
-                polynomial.getCoefficients().set(i, (polynomial.getCoefficients().get(i) + this.coefficients.get(i)) % Field.getMod());
-            }
-            return polynomial;
+    public Polynomial sum(Polynomial b) {
+        int aSize = getCoefficients().size();
+        int bSize = b.getCoefficients().size();
+        boolean aLessThanB = aSize <= bSize;
+        List<Integer> resultCoefficients = new ArrayList<>(aLessThanB ? b.getCoefficients() : getCoefficients());
+        for (int i = 0; i < resultCoefficients.size(); i++) {
+            int ai = aSize > i ? getCoefficients().get(i) : 0;
+            int bi = bSize > i ? b.getCoefficients().get(i) : 0;
+            resultCoefficients.set(i, (ai + bi) % Field.getMod());
         }
+        return new Polynomial(resultCoefficients);
     }
 
     public Polynomial revert() {
@@ -293,7 +293,7 @@ public class Polynomial extends Field implements Converter {
     }
 
     public boolean isReversible() {
-        return getCoefficients().get(0) != 0;
+        return GreatestCommonDivisor.get(getCoefficients().get(0), Field.getMod()) == 1;
     }
 
     public DecompositionOfPolynomial decompose(Polynomial minimalPolynomial) {

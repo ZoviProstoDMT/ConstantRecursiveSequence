@@ -7,6 +7,7 @@ import java.util.*;
 public class Field {
 
     private static final Map<Integer, FieldInfo> allFields = new HashMap<>();
+    //    private static final Map<Polynomial, Integer> notDecomposableMod2 = new HashMap<>();
     public static FieldInfo fieldInfo;
     private static int mod;
 
@@ -34,6 +35,10 @@ public class Field {
         }
     }
 
+    public static FieldInfo getFieldInfo() {
+        return fieldInfo;
+    }
+
     public static List<Integer> normalizeCoefficients(List<Integer> coefficients) {
         ArrayList<Integer> result = new ArrayList<>();
         for (int i = 0; i < coefficients.size(); i++) {
@@ -55,9 +60,7 @@ public class Field {
 
         while (vectors.size() != vectorsQuantity) {
             vector = iterateVector(vector);
-            if (!vectors.contains(vector)) {
-                vectors.add(new ArrayList<>(vector));
-            }
+            vectors.add(new ArrayList<>(vector));
         }
         return vectors;
     }
@@ -66,7 +69,7 @@ public class Field {
         Set<Polynomial> polynomials = new HashSet<>();
         List<List<Integer>> initialVectors = generateInitialVectors(degree);
         for (List<Integer> initialVector : initialVectors) {
-            polynomials.add(new Polynomial(initialVector));
+            polynomials.add(new Polynomial(initialVector, false));
         }
         return polynomials;
     }
@@ -127,6 +130,25 @@ public class Field {
         }
         return result;
     }
+
+//    private void generateNotDecomposablePolynomials() {
+//        notDecomposableMod2.put(new Polynomial(1, 0), 1);
+//        notDecomposableMod2.put(new Polynomial(1, 1), 1);
+//        notDecomposableMod2.put(new Polynomial(1, 1, 1), 3);
+//        notDecomposableMod2.put(new Polynomial(1, 0, 1, 1), 7);
+//        notDecomposableMod2.put(new Polynomial(1, 1, 0, 1), 7);
+//        notDecomposableMod2.put(new Polynomial(1, 0, 0, 1, 1), 15);
+//        notDecomposableMod2.put(new Polynomial(1, 1, 0, 0, 1), 15);
+//        notDecomposableMod2.put(new Polynomial(1, 1, 1, 1, 1), 5);
+//        notDecomposableMod2.put(new Polynomial(1, 0, 0, 1, 0, 1), 31);
+//        notDecomposableMod2.put(new Polynomial(1, 0, 1, 0, 0, 1), 31);
+//        notDecomposableMod2.put(new Polynomial(1, 0, 1, 1, 1, 1), 31);
+//        notDecomposableMod2.put(new Polynomial(1, 1, 0, 1, 1, 1), 31);
+//        notDecomposableMod2.put(new Polynomial(1, 1, 1, 0, 1, 1), 31);
+//        notDecomposableMod2.put(new Polynomial(1, 0, 0, 0, 0, 1, 1), 63);
+//        notDecomposableMod2.put(new Polynomial(1, 0, 0, 1, 0, 0, 1), 63);
+//        notDecomposableMod2.put(new Polynomial(1, 0, 1, 0, 1, 1, 1), 63);
+//    }
 }
 
 class FieldInfo {

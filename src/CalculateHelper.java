@@ -3,8 +3,8 @@ import pojo.GreatestCommonDivisor;
 import pojo.LRP;
 import pojo.polynomial.Polynomial;
 
+import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class CalculateHelper {
 
@@ -13,9 +13,12 @@ public class CalculateHelper {
     }
 
     private static void showSimpleDemo() {
-        Field.setMod(15);
-        LRP lrp = new LRP(new Polynomial(4, 3, 14, 11));
-        System.out.println(lrp.getCyclicType());
+        Field.setMod(8);
+        Polynomial polynomial = new Polynomial(1, 1, 0, 8, 0, 0, 1);
+        List<Integer> initialVector = Arrays.asList(1, 2, 3, 4, 5, 1);
+        LRP lrp = new LRP(polynomial, initialVector);
+
+        showInformationAbout(lrp);
     }
 
     private static void showInformationAbout(LRP lrp) {
@@ -34,18 +37,7 @@ public class CalculateHelper {
         Polynomial minimalPolynomial = lrp.getMinimalPolynomial();
         System.out.println("Минимальный многочлен M(x): " + minimalPolynomial);
         System.out.println();
-        if (characteristicPolynomial.isReversible()) {
-            List<List<LRP>> cyclicClasses = lrp.getCyclicClasses();
-            System.out.println("Циклических классов: " + cyclicClasses.size() + ". ");
-            System.out.println("Размеры циклических классов: " + cyclicClasses.stream().map(List::size).distinct().sorted().collect(Collectors.toList()));
-            for (int i = 0; i < cyclicClasses.size(); i++) {
-                List<LRP> cyclicClass = cyclicClasses.get(i);
-                System.out.println("[" + (i + 1) + "] " + cyclicClass);
-            }
-            System.out.println("Циклический тип: " + lrp.getCyclicType());
-        } else {
-            System.out.println("Невозможно получить информацию о циклическом типе, так как многочлен не реверсивный");
-        }
+        System.out.println("Циклический тип: " + lrp.getCyclicType());
         System.out.println("============================================");
     }
 }
