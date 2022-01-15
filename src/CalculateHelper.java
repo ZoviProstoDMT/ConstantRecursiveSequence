@@ -2,9 +2,10 @@ import pojo.Field;
 import pojo.GreatestCommonDivisor;
 import pojo.LRP;
 import pojo.polynomial.Polynomial;
+import tests.SequenceTests;
 
-import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 public class CalculateHelper {
 
@@ -13,10 +14,13 @@ public class CalculateHelper {
     }
 
     private static void showSimpleDemo() {
-        Field.setMod(8);
-        Polynomial polynomial = new Polynomial(1, 1, 0, 8, 0, 0, 1);
-        List<Integer> initialVector = Arrays.asList(1, 2, 3, 4, 5, 1);
-        LRP lrp = new LRP(polynomial, initialVector);
+        Field.setMod(9);
+        Polynomial polynomial = new Polynomial(1, 1, 0, 1);
+
+//        List<Integer> initialVector = Arrays.asList(1, 1, 0, 1);
+        LRP lrp = new LRP(polynomial);
+
+        System.out.println(lrp.getRecurrentRelation());
 
         showInformationAbout(lrp);
     }
@@ -39,5 +43,15 @@ public class CalculateHelper {
         System.out.println();
         System.out.println("Циклический тип: " + lrp.getCyclicType());
         System.out.println("============================================");
+        Map<Integer, Integer> frequencyResponse = lrp.getFrequencyResponse();
+        List<Integer> sequence = lrp.getSequence(lrp.getPeriod());
+        System.out.println("Последовательность u(x): " + sequence);
+        System.out.println("Распределение элементов");
+        System.out.println(frequencyResponse);
+        System.out.println("Критерий Хи квадрат: " + SequenceTests.getX2CriteriaValue(frequencyResponse, sequence.size()));
+        System.out.println("============================================");
+        int z = 5;
+        System.out.println("Рассмотрим I_F(z) для z = " + z);
+        System.out.println("I_F(z) = " + lrp.getFI(z));
     }
 }

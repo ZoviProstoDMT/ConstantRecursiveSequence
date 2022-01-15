@@ -6,6 +6,8 @@ import pojo.polynomial.Polynomial;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class LRP extends Field implements Converter {
 
@@ -34,6 +36,10 @@ public class LRP extends Field implements Converter {
         this.characteristicPolynomial = new Polynomial(characteristicPolynomial.getCoefficients());
         this.initialVector = normalizeCoefficients(initialVector).subList(0, characteristicPolynomial.getDegree());
         recurrentRelation = convertFrom(characteristicPolynomial);
+    }
+
+    public RecurrentRelation getRecurrentRelation() {
+        return recurrentRelation;
     }
 
     public List<Integer> getInitialVector() {
@@ -229,8 +235,29 @@ public class LRP extends Field implements Converter {
         return cyclicClasses;
     }
 
-    public int getI(int a) {
-        return getSequence(getPeriod()).indexOf(a) + 1;
+    public int getI(int z) {
+        return getSequence(getPeriod()).indexOf(z) + 1;
+    }
+
+    public int getFI(int z) {
+        int fi = 0;
+        int degree = getCharacteristicPolynomial().getDegree();
+        List<List<Integer>> vectors = generateInitialVectors(degree);
+        List<Integer> finalSequence = null;
+        List<Integer> finalVector = null;
+        for (List<Integer> vector : vectors) {
+            LRP lrp = new LRP(getCharacteristicPolynomial(), vector);
+            List<Integer> sequence = lrp.getSequence(lrp.getPeriod());
+            int index = sequence.indexOf(z) + 1;
+            if (index > fi) {
+                fi = index;
+                finalSequence = sequence;
+                finalVector = vector;
+            }
+        }
+        System.out.println("Начальный вектор: " + finalVector);
+        System.out.println("Последовательность: " + finalSequence);
+        return fi;
     }
 
     private int getPrimaryPeriod() {
@@ -367,6 +394,14 @@ public class LRP extends Field implements Converter {
             Field.setMod(oldMod);
             return cyclicTypeResult;
         }
+    }
+
+    public Map<Integer, Integer> getFrequencyResponse() {
+        Map<Integer, Integer> map = new TreeMap<>();
+        for (Integer digit : getSequence(getPeriod())) {
+            map.compute(digit, (number, count) -> count == null ? 1 : count + 1);
+        }
+        return map;
     }
 
     public boolean equals(LRP lrp, int period) {
